@@ -1,0 +1,91 @@
+diff -uNr /usr/share/otopi/plugins/otopi/network/iptables.py otopi_modified/otopi/network/iptables.py
+--- /usr/share/otopi/plugins/otopi/network/iptables.py	2017-12-01 00:02:20.000000000 +0800
++++ otopi_modified/otopi/network/iptables.py	2018-01-03 10:23:29.846813838 +0800
+@@ -84,7 +84,8 @@
+         self.environment[constants.CoreEnv.MAIN_TRANSACTION].append(
+             filetransaction.FileTransaction(
+                 name=self.REDHAT_IPTABLES,
+-                owner='root',
++                #owner='root',
++		owner='admin',
+                 mode=0o600,
+                 enforcePermissions=True,
+                 content=self.environment[
+diff -uNr /usr/share/otopi/plugins/ovirt-host-common/vdsm/pki.py otopi_modified/ovirt-host-common/vdsm/pki.py
+--- /usr/share/otopi/plugins/ovirt-host-common/vdsm/pki.py	2018-01-03 10:40:57.762082812 +0800
++++ otopi_modified/ovirt-host-common/vdsm/pki.py	2018-01-03 10:37:48.386937220 +0800
+@@ -215,7 +215,9 @@
+             self.environment[otopicons.CoreEnv.MAIN_TRANSACTION].append(
+                 filetransaction.FileTransaction(
+                     name=pendingKey,
+-                    owner='root',
++                    #owner='root',
++		    # QNAP admin user
++		    owner='admin'
+                     downer='vdsm',
+                     dgroup='kvm',
+                     mode=0o400,
+@@ -262,7 +264,9 @@
+                 self.environment[otopicons.CoreEnv.MAIN_TRANSACTION].append(
+                     filetransaction.FileTransaction(
+                         name=f,
+-                        owner='root',
++                        #owner='root',
++			# QNAP admin user
++			owner='admin',
+                         downer='vdsm',
+                         dgroup='kvm',
+                         enforcePermissions=True,
+@@ -290,7 +294,9 @@
+                 self.environment[otopicons.CoreEnv.MAIN_TRANSACTION].append(
+                     filetransaction.FileTransaction(
+                         name=f,
+-                        owner='root',
++                        #owner='root',
++			#QNAP admin user
++			owner='admin',
+                         downer='vdsm',
+                         dgroup='kvm',
+                         enforcePermissions=True,
+diff -uNr /usr/share/otopi/plugins/ovirt-host-deploy/vdsm/config.py otopi_modified/ovirt-host-deploy/vdsm/config.py
+--- /usr/share/otopi/plugins/ovirt-host-deploy/vdsm/config.py	2018-01-03 10:39:56.882179652 +0800
++++ otopi_modified/ovirt-host-deploy/vdsm/config.py	2018-01-03 10:38:11.035041130 +0800
+@@ -101,7 +101,9 @@
+             self.environment[otopicons.CoreEnv.MAIN_TRANSACTION].append(
+                 filetransaction.FileTransaction(
+                     name=odeploycons.FileLocations.VDSM_CONFIG_FILE,
+-                    owner='root',
++                    #owner='root',
++		    #QNAP admin user
++		    owner='admin',
+                     enforcePermissions=True,
+                     content=b.content,
+                     modifiedList=self.environment[
+diff -uNr /usr/share/otopi/plugins/ovirt-host-deploy/vdsm/vdsmid.py otopi_modified/ovirt-host-deploy/vdsm/vdsmid.py
+--- /usr/share/otopi/plugins/ovirt-host-deploy/vdsm/vdsmid.py	2018-01-03 10:39:39.144664630 +0800
++++ otopi_modified/ovirt-host-deploy/vdsm/vdsmid.py	2018-01-03 10:38:11.035041130 +0800
+@@ -134,7 +134,9 @@
+         self.environment[otopicons.CoreEnv.MAIN_TRANSACTION].append(
+             filetransaction.FileTransaction(
+                 name=odeploycons.FileLocations.VDSM_ID_FILE,
+-                owner='root',
++                #owner='root',
++		#QNAP admin user
++		owner='admin',
+                 enforcePermissions=True,
+                 content=self.environment[
+                     odeploycons.VdsmEnv.VDSM_ID
+diff -uNr /usr/share/otopi/plugins/ovirt-host-deploy/vdsmhooks/hooks.py otopi_modified/ovirt-host-deploy/vdsmhooks/hooks.py
+--- /usr/share/otopi/plugins/ovirt-host-deploy/vdsmhooks/hooks.py	2018-01-03 10:39:14.089762216 +0800
++++ otopi_modified/ovirt-host-deploy/vdsmhooks/hooks.py	2018-01-03 10:38:11.035041130 +0800
+@@ -81,7 +81,9 @@
+                                 rel,
+                                 name,
+                             ),
+-                            owner='root',
++                            #owner='root',
++			    #QNAP admin user
++			    owner='admin',
+                             enforcePermissions=True,
+                             content=content,
+                             modifiedList=self.environment[

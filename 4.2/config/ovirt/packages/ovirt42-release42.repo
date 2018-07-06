@@ -1,0 +1,6 @@
+[ovirt42-release42]
+name=ovirt42-release42
+baseurl=http://resources.ovirt.org/pub/ovirt-4.2/rpm/el7/
+enabled=1
+gpgcheck=0
+priority=2

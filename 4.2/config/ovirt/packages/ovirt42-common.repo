@@ -1,0 +1,6 @@
+[ovirt42-common]
+name=ovirt42-common
+baseurl=http://mirror.centos.org/centos/7/virt/x86_64/ovirt-4.2/
+enabled=1
+gpgcheck=0
+priority=5

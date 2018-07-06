@@ -1,0 +1,6 @@
+[ovirt-qcs]
+name=ovirt-engine by QNAP
+baseurl=file:///tmp/qcs
+enabled=1
+gpgcheck=0
+priority=1

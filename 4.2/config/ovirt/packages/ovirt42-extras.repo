@@ -1,0 +1,6 @@
+[ovirt42-extras]
+name=ovirt42-extras
+baseurl=http://mirror.centos.org/centos/7/extras/x86_64/
+enabled=1
+gpgcheck=0
+priority=4

@@ -1,0 +1,6 @@
+[ovirt42-sclo]
+name=ovirt42-sclo
+baseurl=http://mirror.centos.org/centos/7/sclo/x86_64/rh/
+enabled=1
+gpgcheck=0
+priority=6

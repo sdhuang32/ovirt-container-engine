@@ -1,0 +1,230 @@
+diff -uNr /usr/share/ovirt-host-deploy/plugins/ovirt-host-common/vmconsole/pki.py ovirt-host-deploy/plugins/ovirt-host-common/vmconsole/pki.py
+--- /usr/share/ovirt-host-deploy/plugins/ovirt-host-common/vmconsole/pki.py	2018-02-01 20:27:04.000000000 +0800
++++ ovirt-host-deploy/plugins/ovirt-host-common/vmconsole/pki.py	2018-02-23 12:28:20.665281023 +0800
+@@ -91,10 +91,6 @@
+             odeploycons.VMConsoleEnv.KEY_SIZE,
+             odeploycons.Defaults.DEFAULT_KEY_SIZE
+         )
+-        self.environment.setdefault(
+-            odeploycons.VMConsoleEnv.CAKEY,
+-            None
+-        )
+ 
+     @plugin.event(
+         stage=plugin.Stages.STAGE_VALIDATION,
+diff -uNr /usr/share/ovirt-host-deploy/plugins/ovirt-host-deploy/gluster/nrpe.py ovirt-host-deploy/plugins/ovirt-host-deploy/gluster/nrpe.py
+--- /usr/share/ovirt-host-deploy/plugins/ovirt-host-deploy/gluster/nrpe.py	2018-02-01 20:27:04.000000000 +0800
++++ ovirt-host-deploy/plugins/ovirt-host-deploy/gluster/nrpe.py	2018-02-23 12:29:14.409475736 +0800
+@@ -41,12 +41,6 @@
+ @util.export
+ class Plugin(plugin.PluginBase):
+     """
+-    Environment:
+-        GlusterEnv.MONITORING_ENABLE -- enable gluster nrpe agent
+-
+-        GlusterEnv.MONITORING_SERVER -- server accessing nrpe agent
+-
+-    Configuration:
+     # sample nrpe config file format
+     # comment
+     key1=value1
+diff -uNr /usr/share/ovirt-host-deploy/plugins/ovirt-host-deploy/gluster/packages.py ovirt-host-deploy/plugins/ovirt-host-deploy/gluster/packages.py
+--- /usr/share/ovirt-host-deploy/plugins/ovirt-host-deploy/gluster/packages.py	2018-02-01 20:27:04.000000000 +0800
++++ ovirt-host-deploy/plugins/ovirt-host-deploy/gluster/packages.py	2018-02-23 12:31:07.616885885 +0800
+@@ -63,13 +63,6 @@
+         ),
+     )
+     def _validation(self):
+-        if not self.packager.queryPackages(patterns=('vdsm-gluster',)):
+-            raise RuntimeError(
+-                _(
+-                    'Cannot locate gluster packages, '
+-                    'possible cause is incorrect channels'
+-                )
+-            )
+         self._enabled = True
+ 
+     @plugin.event(
+@@ -77,7 +70,7 @@
+         condition=lambda self: self._enabled,
+     )
+     def _packages(self):
+-        self.packager.installUpdate(('vdsm-gluster',))
++        pass
+ 
+     @plugin.event(
+         stage=plugin.Stages.STAGE_CLOSEUP,
+diff -uNr /usr/share/ovirt-host-deploy/plugins/ovirt-host-deploy/hosted-engine/packages.py ovirt-host-deploy/plugins/ovirt-host-deploy/hosted-engine/packages.py
+--- /usr/share/ovirt-host-deploy/plugins/ovirt-host-deploy/hosted-engine/packages.py	2018-02-01 20:27:03.000000000 +0800
++++ ovirt-host-deploy/plugins/ovirt-host-deploy/hosted-engine/packages.py	2018-02-23 12:32:16.722136252 +0800
+@@ -41,10 +41,7 @@
+     """oVirt Hosted Engine pacakges.
+ 
+     Environment:
+-        HostedEngineEnv.ACTION -- perform Hosted Engine customization:
+-          Const.HOSTED_ENGINE_ACTION_NONE: do nothing
+-          Const.HOSTED_ENGINE_ACTION_DEPLOY: deploy configuration
+-          Const.HOSTED_ENGINE_ACTION_REMOVE: remove configuration
++        HostedEngineEnv.ENABLE -- perform Hosted Engine customization.
+     """
+     def __init__(self, context):
+         super(Plugin, self).__init__(context=context)
+diff -uNr /usr/share/ovirt-host-deploy/plugins/ovirt-host-deploy/tune/tuned.py ovirt-host-deploy/plugins/ovirt-host-deploy/tune/tuned.py
+--- /usr/share/ovirt-host-deploy/plugins/ovirt-host-deploy/tune/tuned.py	2018-02-01 20:27:04.000000000 +0800
++++ ovirt-host-deploy/plugins/ovirt-host-deploy/tune/tuned.py	2018-02-23 12:33:57.694501021 +0800
+@@ -37,11 +37,7 @@
+ 
+ @util.export
+ class Plugin(plugin.PluginBase):
+-    """TuneD configuration plugin.
+-
+-    Environment:
+-        TuneEnv.TUNED_PROFILE -- tuned profile to be set
+-    """
++    """TuneD configuration plugin."""
+ 
+     def __init__(self, context):
+         super(Plugin, self).__init__(context=context)
+@@ -87,7 +83,7 @@
+         condition=lambda self: self._enabled,
+     )
+     def _packages(self):
+-        self.packager.installUpdate(('tuned',))
++        pass
+ 
+     @plugin.event(
+         stage=plugin.Stages.STAGE_MISC,
+@@ -95,19 +91,6 @@
+     )
+     def _misc(self):
+         # tuned-adm does not work if daemon is down!
+-        self.services.state('tuned', True)
+-        rc, stdout, stderr = self.execute(
+-            (
+-                self.command.get('tuned-adm'),
+-                'profile',
+-                self._profile,
+-            ),
+-            raiseOnError=False,
+-        )
+-        if rc != 0:
+-            self.logger.warning(_('Cannot set tuned profile'))
+-        else:
+-            self.services.startup('tuned', True)
+-
++        pass
+ 
+ # vim: expandtab tabstop=4 shiftwidth=4
+diff -uNr /usr/share/ovirt-host-deploy/plugins/ovirt-host-deploy/vdsm/hardware.py ovirt-host-deploy/plugins/ovirt-host-deploy/vdsm/hardware.py
+--- /usr/share/ovirt-host-deploy/plugins/ovirt-host-deploy/vdsm/hardware.py	2018-02-01 20:27:04.000000000 +0800
++++ ovirt-host-deploy/plugins/ovirt-host-deploy/vdsm/hardware.py	2018-02-23 12:34:51.810696013 +0800
+@@ -64,18 +64,7 @@
+         ],
+     )
+     def _validate_virtualization(self):
+-        virtualization = hardware.Virtualization()
+-        result = virtualization.detect()
+-        if result == virtualization.DETECT_RESULT_UNSUPPORTED:
+-            raise RuntimeError(
+-                _('Hardware does not support virtualization')
+-            )
+-        elif result == virtualization.DETECT_RESULT_SUPPORTED:
+-            self.logger.info(_('Hardware supports virtualization'))
+-        else:
+-            self.logger.warning(
+-                _('Cannot detect if hardware supports virtualization')
+-            )
++        pass
+ 
+     @plugin.event(
+         stage=plugin.Stages.STAGE_VALIDATION,
+diff -uNr /usr/share/ovirt-host-deploy/plugins/ovirt-host-deploy/vdsm/packages.py ovirt-host-deploy/plugins/ovirt-host-deploy/vdsm/packages.py
+--- /usr/share/ovirt-host-deploy/plugins/ovirt-host-deploy/vdsm/packages.py	2018-02-01 20:27:04.000000000 +0800
++++ ovirt-host-deploy/plugins/ovirt-host-deploy/vdsm/packages.py	2018-02-23 12:38:02.163381874 +0800
+@@ -72,7 +72,7 @@
+         stage=plugin.Stages.STAGE_VALIDATION,
+     )
+     def _validation(self):
+-        result = self.packager.queryPackages(patterns=('vdsm',))
++        result = ({'version': '4.20.9', 'release': '1'},)
+         if not result:
+             raise RuntimeError(
+                 _(
+@@ -118,7 +118,6 @@
+         stage=plugin.Stages.STAGE_CLOSEUP,
+     )
+     def _closeup(self):
+-        self.services.startup('vdsmd', True)
+         if not self.services.supportsDependency:
+             if self.services.exists('libvirtd'):
+                 self.services.startup('libvirtd', True)
+@@ -132,19 +131,7 @@
+         priority=plugin.Stages.PRIORITY_HIGH,
+     )
+     def _reconfigure(self):
+-        vdsm_tool = self.command.get(
+-            command='vdsm-tool',
+-        )
+-        rc, stdout, stderr = self.execute(
+-            (
+-                vdsm_tool,
+-                'configure',
+-                '--force',
+-            ),
+-            raiseOnError=False,
+-        )
+-        if rc != 0:
+-            self.logger.warning('Cannot configure vdsm')
++        pass
+ 
+     @plugin.event(
+         stage=plugin.Stages.STAGE_CLOSEUP,
+diff -uNr /usr/share/ovirt-host-deploy/plugins/ovirt-host-deploy/vdsm/software.py ovirt-host-deploy/plugins/ovirt-host-deploy/vdsm/software.py
+--- /usr/share/ovirt-host-deploy/plugins/ovirt-host-deploy/vdsm/software.py	2018-02-01 20:27:04.000000000 +0800
++++ ovirt-host-deploy/plugins/ovirt-host-deploy/vdsm/software.py	2018-02-23 12:42:18.653306041 +0800
+@@ -74,15 +74,23 @@
+                 break
+ 
+         if not supported:
+-            raise RuntimeError(
+-                _(
+-                    'Distribution {distribution} version {version} '
+-                    'is not supported'
+-                ).format(
+-                    distribution=dist,
+-                    version=ver,
+-                )
+-            )
+-
++            if dist == 'debian':
++                pass
++            elif dist == 'Ubuntu':
++                pass
++            elif dist == 'QTS': # QNAP OS
++                pass
++            elif dist == '': # QNAP workiaround
++                pass
++            else:
++                raise RuntimeError(
++                    _(
++                        'Distribution {distribution} version {version} '
++                        'is not supported'
++                    ).format(
++                        distribution=dist,
++                        version=ver,
++                    )
++               )
+ 
+ # vim: expandtab tabstop=4 shiftwidth=4
+diff -uNr /usr/share/ovirt-host-deploy/plugins/ovirt-host-deploy/vdsm/vdsmid.py ovirt-host-deploy/plugins/ovirt-host-deploy/vdsm/vdsmid.py
+--- /usr/share/ovirt-host-deploy/plugins/ovirt-host-deploy/vdsm/vdsmid.py	2018-02-01 20:27:04.000000000 +0800
++++ ovirt-host-deploy/plugins/ovirt-host-deploy/vdsm/vdsmid.py	2018-02-23 12:42:51.469424280 +0800
+@@ -81,7 +81,7 @@
+     )
+     def _packages(self):
+         if platform.machine() in ('x86_64', 'i686'):
+-            self.packager.install(('dmidecode',))
++            pass
+ 
+     @plugin.event(
+         stage=plugin.Stages.STAGE_CUSTOMIZATION,

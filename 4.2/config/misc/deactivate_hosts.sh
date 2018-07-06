@@ -1,0 +1,1 @@
+ovirt-shell -c -E "action host * deactivate"

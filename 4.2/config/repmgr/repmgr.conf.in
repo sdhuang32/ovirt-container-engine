@@ -1,0 +1,13 @@
+cluster=qcs
+node=NODE_NUMBER
+node_name=NODE_NAME
+conninfo='host=NODE_ADDRESS user=repmgr dbname=repmgr'
+
+failover=automatic
+promote_command='repmgr standby promote -f /etc/repmgr.conf'
+follow_command='repmgr standby follow -f /etc/repmgr.conf'
+
+reconnect_attempts=2
+reconnect_interval=2
+
+logfile='/var/log/repmgr/repmgr.log'

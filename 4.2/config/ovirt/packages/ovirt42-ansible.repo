@@ -1,0 +1,6 @@
+[ovirt42-ansible]
+name=ovirt42-ansible
+baseurl=file:///tmp/ansible
+enabled=1
+gpgcheck=0
+priority=3

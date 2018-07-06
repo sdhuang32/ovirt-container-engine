@@ -1,0 +1,8 @@
+DEVICE=eth0
+NM_CONTROLLED="yes"
+ONBOOT=yes
+TYPE=Ethernet
+BOOTPROTO=static
+NAME=eth0
+IPADDR=${IP}
+NETMASK=${NET_MASK}

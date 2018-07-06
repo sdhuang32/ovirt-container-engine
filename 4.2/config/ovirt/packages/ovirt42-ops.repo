@@ -1,0 +1,6 @@
+[ovirt42-ops]
+name=ovirt42-ops
+baseurl=http://mirror.centos.org/centos/7/opstools/x86_64/
+enabled=1
+gpgcheck=0
+priority=7

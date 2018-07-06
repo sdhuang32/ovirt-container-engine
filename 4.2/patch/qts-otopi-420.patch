@@ -1,0 +1,84 @@
+diff -uNr /usr/share/otopi/plugins/otopi/packagers/dnfpackager.py otopi/plugins/otopi/packagers/dnfpackager.py
+--- /usr/share/otopi/plugins/otopi/packagers/dnfpackager.py	2017-12-01 00:02:20.000000000 +0800
++++ otopi/plugins/otopi/packagers/dnfpackager.py	2018-01-02 18:48:23.461016811 +0800
+@@ -150,27 +150,28 @@
+             True
+         )
+ 
+-        try:
+-            if self.environment[constants.PackEnv.DNFPACKAGER_ENABLED]:
+-                self._minidnf = self._getMiniDNF(
+-                    disabledPlugins=self.environment[
+-                        constants.PackEnv.DNF_DISABLED_PLUGINS
+-                    ],
+-                )
++        #try:
++        #    if self.environment[constants.PackEnv.DNFPACKAGER_ENABLED]:
++        #        self._minidnf = self._getMiniDNF(
++        #            disabledPlugins=self.environment[
++        #                constants.PackEnv.DNF_DISABLED_PLUGINS
++        #            ],
++        #        )
+ 
+-                # the following will trigger the NOTIFY_REEXEC
+-                # and then reexecute
+-                if os.geteuid() == 0:
+-                    self._minidnf.selinux_role()
+-                    self._enabled = True
+-                    self.environment[
+-                        constants.PackEnv.YUMPACKAGER_ENABLED
+-                    ] = False
+-        except Exception:
+-            # not calling with exc_info=True, because we always try to
+-            # load DNF support first, polluting the logs with misleading
+-            # tracebacks when running on yum-based operating systems
+-            self.logger.debug('Cannot initialize minidnf')
++        #        # the following will trigger the NOTIFY_REEXEC
++        #        # and then reexecute
++        #        if os.geteuid() == 0:
++        #            self._minidnf.selinux_role()
++        #            self._enabled = True
++        #            self.environment[
++        #                constants.PackEnv.YUMPACKAGER_ENABLED
++        #            ] = False
++        #except Exception:
++        #    # not calling with exc_info=True, because we always try to
++        #    # load DNF support first, polluting the logs with misleading
++        #    # tracebacks when running on yum-based operating systems
++        #    self.logger.debug('Cannot initialize minidnf')
++        pass
+ 
+     @plugin.event(
+         before=(
+diff -uNr /usr/share/otopi/plugins/otopi/packagers/yumpackager.py otopi/plugins/otopi/packagers/yumpackager.py
+--- /usr/share/otopi/plugins/otopi/packagers/yumpackager.py	2017-12-01 00:02:20.000000000 +0800
++++ otopi/plugins/otopi/packagers/yumpackager.py	2018-01-03 09:38:12.263328781 +0800
+@@ -174,17 +174,18 @@
+             True
+         )
+ 
+-        try:
+-            if self.environment[constants.PackEnv.YUMPACKAGER_ENABLED]:
+-                self._refreshMiniyum()
++        #try:
++        #    if self.environment[constants.PackEnv.YUMPACKAGER_ENABLED]:
++        #        self._refreshMiniyum()
+ 
+-                # the following will trigger the NOTIFY_REEXEC
+-                # and then reexecute
+-                if os.geteuid() == 0:
+-                    self._miniyum.selinux_role()
+-                    self._enabled = True
+-        except Exception:
+-            self.logger.debug('Cannot initialize miniyum', exc_info=True)
++        #        # the following will trigger the NOTIFY_REEXEC
++        #        # and then reexecute
++        #        if os.geteuid() == 0:
++        #            self._miniyum.selinux_role()
++        #            self._enabled = True
++        #except Exception:
++        #    self.logger.debug('Cannot initialize miniyum', exc_info=True)
++        pass
+ 
+     @plugin.event(
+         before=(

@@ -1,0 +1,575 @@
+swagger: '2.0'
+info:
+  description: REST API Deifnitaions for QNAP Storage Gateway (QSGW)
+  version: 0.5.0
+  title: QNAP Storage Gateway
+#  license:
+#    name: Apache 2.0
+#    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+#host: 10.19.25.119
+basePath: /qsgw
+tags:
+  - name: qsgw
+  - name: /qsgw/iscsi
+  - name: /qsgw/iscsi/disks
+  - name: /qsgw/iscsi/luns
+  - name: /qsgw/iscsi/targets
+  - name: /qsgw/ctdb
+  - name: /qsgw/share
+schemes:
+  - http
+paths:
+  /qsgw/apis:
+    get:
+      tags:
+        - qsgw
+      summary: Get supported REST API list of QNAP Storage Gateway
+      description: REST API List for QNAP Storage Gateway
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+  /qsgw/iscsi/apis:
+    get:
+      tags:
+        - /qsgw/iscsi
+      summary: Get Supported iSCSI REST API
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+  /qsgw/iscsi/disks:
+    get:
+      tags:
+        - /qsgw/iscsi/disks
+      summary: Get RBD DISK List
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+    post:
+      tags:
+        - /qsgw/iscsi/disks
+      summary: Add a RBD DISK
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+  '/qsgw/iscsi/disks/{disk_name}':
+    get:
+      tags:
+        - /qsgw/iscsi/disks
+      summary: Get RBD DISK Information by its name
+      operationId: getRbdDiskByName
+      parameters:
+        - name: disk_name
+          in: path
+          description: disk name used for getting information
+          required: true
+          type: string
+          format: string
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+    delete:
+      tags:
+        - /qsgw/iscsi/disks
+      summary: Delete RBD DISK by its name
+      description: Delete a RBD DISK from ceph pool
+      operationId: deleteRbdDisk
+      produces:
+        - application/xml
+        - application/json
+      parameters:
+        - name: disk_name
+          in: path
+          description: disk name used for delete operation
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: pool the disk resides
+          required: true
+          schema:
+            $ref: '#/definitions/pool'
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+  /qsgw/iscsi/luns:
+    get:
+      tags:
+        - /qsgw/iscsi/luns
+      summary: Get Lun List
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+    post:
+      tags:
+        - /qsgw/iscsi/luns
+      summary: Add a LUN
+      parameters:
+        - in: body
+          name: body
+          description: LUN Info Object
+          required: false
+          schema:
+            $ref: '#/definitions/LUN'
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+  '/qsgw/iscsi/luns/{lun_name}':
+    get:
+      tags:
+        - /qsgw/iscsi/luns
+      summary: Get LUN Information by its name
+      operationId: getLUNInfoByName
+      parameters:
+        - name: lun_name
+          in: path
+          description: lun name used for getting information
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+    delete:
+      tags:
+        - /qsgw/iscsi/luns
+      summary: Delete LUN by its name
+      description: Delete a LUN
+      operationId: deleteLUN
+      produces:
+        - application/xml
+        - application/json
+      parameters:
+        - name: lun_name
+          in: path
+          description: lun name used for delete operation
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+  /qsgw/iscsi/targets:
+    get:
+      tags:
+        - /qsgw/iscsi/targets
+      summary: Get iSCSI Target List
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+    post:
+      tags:
+        - /qsgw/iscsi/targets
+      summary: Add an iSCSI Target
+      parameters:
+        - in: body
+          name: body
+          description: Target Info Object
+          required: true
+          schema:
+            $ref: '#/definitions/target'
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+  '/qsgw/iscsi/targets/{target_name}':
+    get:
+      tags:
+        - /qsgw/iscsi/targets
+      summary: Get Target Information by its name
+      operationId: getTargetInfoByName
+      parameters:
+        - name: target_name
+          in: path
+          description: Target name used for getting information
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+    put:
+      tags:
+        - /qsgw/iscsi/targets
+      summary: Control Target by its name
+      operationId: modifyTarget
+      parameters:
+        - name: target_name
+          in: path
+          description: Target name used for controlling
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: control block
+          required: true
+          schema:
+            $ref: '#/definitions/target_control'
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+    delete:
+      tags:
+        - /qsgw/iscsi/targets
+      summary: Delete a Target by its name
+      description: Delete a Target
+      operationId: deleteTarget
+      produces:
+        - application/xml
+        - application/json
+      parameters:
+        - name: target_name
+          in: path
+          description: lun name used for delete operation
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+  /qsgw/shares/apis:
+    get:
+      tags:
+        - /qsgw/shares
+      summary: Get Supported Share REST API
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+  /qsgw/shares:
+    get:
+      tags:
+        - /qsgw/shares
+      summary: Get the list of shares
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+    post:
+      tags:
+        - /qsgw/shares
+      summary: Add a share
+      description: Add a Share
+      operationId: addShare
+      produces:
+        - application/xml
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: share name and properties
+          required: true
+          schema:
+            $ref: '#/definitions/share'
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+  /qsgw/shares/{share_name}:
+    get:
+      tags:
+        - /qsgw/shares
+      summary: Get Porperties on the share
+      parameters:
+        - name: share_name
+          in: path
+          description: share name used for delete operation
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+    delete:
+      tags:
+        - /qsgw/shares
+      summary: Delete a share by its name
+      description: Share a LUN
+      operationId: deleteShare
+      produces:
+        - application/xml
+        - application/json
+      parameters:
+        - name: share_name
+          in: path
+          description: share name used for delete operation
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+    put:
+      tags:
+        - /qsgw/shares
+      summary: share control
+      parameters:
+        - name: share_name
+          in: path
+          description: share management
+          type: string
+          required: true
+        - in: body
+          name: body
+          description: properties
+          required: true
+          schema:
+            $ref: '#/definitions/share_property'
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+  /qsgw/ctdb/apis:
+    get:
+      tags:
+        - /qsgw/ctdb
+      summary: Get Supported CTDB REST API
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+  /qsgw/ctdb/service:
+    get:
+      tags:
+        - /qsgw/ctdb/service
+      summary: Get CTDB Status
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+  /qsgw/ctdb/service/{control}:
+    put:
+      tags:
+        - /qsgw/ctdb/service
+      summary: CTDB Service Control
+      parameters:
+        - name: control
+          in: path
+          description: control
+          type: string
+          required: true
+        - in: body
+          name: body
+          description: control block
+          required: true
+          schema:
+            $ref: '#/definitions/ctdb_control'
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+  /qsgw/ctdb/vips:
+    get:
+      tags:
+        - /qsgw/ctdb/vips
+      summary: Get Virutal IP List
+      operationId: getVIPList
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+    delete:
+      tags:
+        - /qsgw/ctdb/vips
+      summary: Delete a virtual IP
+      description: Delete a virtual IP
+      operationId: deleteVIP
+      produces:
+        - application/xml
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: vip for deleting
+          required: true
+          schema:
+            $ref: '#/definitions/ctdb_control'
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+    post:
+      tags:
+        - /qsgw/ctdb/vips
+      summary: Delete a virtual IP
+      description: Delete a virtual IP
+      operationId: addVIP
+      produces:
+        - application/xml
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: vip for deleting
+          required: true
+          schema:
+            $ref: '#/definitions/ctdb_control'
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+  /qsgw/ctdb/nodes:
+    get:
+      tags:
+        - /qsgw/ctdb/nodes
+      summary: Get Node List
+      operationId: getNodeList
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+    delete:
+      tags:
+        - /qsgw/ctdb/nodes
+      summary: Delete a Service Node
+      description: Delete a Service Node
+      operationId: deleteNode
+      produces:
+        - application/xml
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: node for deleting
+          required: true
+          schema:
+            $ref: '#/definitions/ctdb_control'
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+    post:
+      tags:
+        - /qsgw/ctdb/nodes
+      summary: Delete a Service Node
+      description: Delete a Service Node
+      operationId: addNode
+      produces:
+        - application/xml
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: node for deleting
+          required: true
+          schema:
+            $ref: '#/definitions/ctdb_control'
+      responses:
+        '200':
+          description: successfully
+        '400':
+          description: api not found
+definitions:
+  pool:
+    type: object
+    properties:
+      pool:
+        type: string
+  LUN:
+    type: object
+    properties:
+      lun:
+        type: integer
+        format: int32
+      name:
+        type: string
+      disk:
+        type: string
+  target:
+    type: object
+    properties:
+      name:
+        type: string
+  target_control:
+    type: object
+    required:
+      - op
+    properties:
+      op:
+        type: string
+        description: operation
+      lun:
+        type: string
+        description: lun for operation map/unmap
+      np:
+        type: string
+        description: network portal
+  ctdb_control:
+    type: object
+    properties:
+      vip:
+        type: string
+        description: virtual ip for service
+      node:
+        type: string
+        description: service node
+  share:
+    type: object
+    properties:
+      name:
+        type: string
+        description: share name foradding
+      properties:
+        type: object
+        description: properties for adding
+  share_property:
+    type: object
+    properties:
+      acl:
+        type: string
+        description: share acl for settings
+      type:
+        type: string
+        description: protocol type
+      access:
+        type: string
+        description: access settings
+      encrypt:
+        type: string
+        description: encrypt feature
+      advanced:
+        type: string
+        description: advanced properties
+    

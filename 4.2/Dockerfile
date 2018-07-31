@@ -4,7 +4,7 @@ FROM sdhuang32/c7-systemd
 ENV POSTGRES_USER engine
 ENV POSTGRES_PASSWORD engine
 ENV POSTGRES_DB engine
-ENV POSTGRES_HOST localhost
+ENV POSTGRES_HOST postgres
 ENV POSTGRES_PORT 5432
 
 # oVirt
@@ -14,7 +14,7 @@ USER root
 WORKDIR /root/
 
 # Install basic tools
-RUN yum -y install vim net-tools libselinux-python rsync patch wget less openssh-server cronie
+RUN yum -y install vim net-tools libselinux-python rsync patch wget less openssh-server cronie sudo
 # Set rc.local to executable
 RUN chmod 0755 /etc/rc.d/rc.local
 # Set ssh key to remote host
@@ -68,25 +68,24 @@ COPY  config/ovirt/packages/qcs/repodata/* /tmp/qcs/repodata/
 RUN ls /tmp/qcs
 RUN chmod -R 755 /tmp/qcs/noarch
 
-COPY config/repmgr/* /root/
 RUN wget https://copr.fedorainfracloud.org/coprs/manageiq/ManageIQ-Master/repo/epel-7/manageiq-ManageIQ-Master-epel-7.repo -O /etc/yum.repos.d/manageiq-ManageIQ-Master-epel-7.repo
 RUN yum -y install ovirt-engine-extension-aaa-ldap-setup rh-postgresql95-repmgr
 RUN yum -y clean all \
     && rm -rf /var/cache/yum
 
-# Clean up rpm files
+## Clean up rpm files
 RUN rm -rf /tmp/qcs/noarch/* \
     && rm -f /tmp/ansible/ansible-2.5.2-1.el7.noarch.rpm
 
-# # dockerize helps us waiting for postgres being ready
+## dockerize helps us waiting for postgres being ready
 ENV DOCKERIZE_VERSION v0.6.1
 RUN curl -OL https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
-# # engine-setup needs the link to initctl
+## engine-setup needs the link to initctl
 RUN ln -s /usr/bin/systemctl /usr/bin/initctl
 
-# #oVirt
+## oVirt
 ENV OVIRT_PASSWORD admin
 ENV OVIRT_PKI_ORGANIZATION local
 
@@ -94,6 +93,8 @@ COPY entrypoint.sh answers.conf.in qcs-engine-setup.sh /
 COPY 999-ovirt-engine.conf /etc/ovirt-engine/engine.conf.d/
 COPY patch/* patch/
 
+## repmgr cluster configs
+COPY config/repmgr/repmgr.conf.in /etc/repmgr.conf
 COPY config/repmgr/auto_start_engine.sh /opt/rh/rh-postgresql95/root/usr/bin/
 COPY config/repmgr/disable_node.sh /opt/rh/rh-postgresql95/root/usr/bin/
 COPY config/repmgr/restore_old_master.sh /opt/rh/rh-postgresql95/root/usr/bin/
@@ -102,14 +103,25 @@ RUN chmod 0644 /etc/profile.d/rh-postgresql95.sh
 ADD config/repmgr/auto-start-engine-cron /etc/cron.d/auto-start-engine-cron
 RUN chmod 0644 /etc/cron.d/auto-start-engine-cron
 
-# # patch engine-setup so that it does not try to start or stop services with systemd
+## set default root password for ssh
+RUN echo "admin" | passwd root --stdin
+
+## Add ovirt user to sudoers
+RUN echo -e "\n## KS-Redmine#32303" >> /etc/sudoers
+RUN echo "ovirt ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+## Add UI plugin for Swagger spec of oVirt API
+COPY config/ovirt/ovirt-api-swagger-spec/plugin/* /usr/share/ovirt-engine/ui-plugins/
+
+## patch engine-setup so that it does not try to start or stop services with systemd
 RUN patch -d/ -p0 < patch/setup.patch
+## Apply ovirt-engine patch for QTS
 RUN patch -d/ -p0 < patch/qts-otopi-420.patch
 RUN patch -d/ -p0 < patch/qts-ovirt-host-deploy-420.patch
 RUN patch -d/ -p0 < patch/otopi-admin-user-420.patch
 RUN patch -d/ -p0 < patch/engine-iso-uploader-420.patch
 
-# # For kubernetes copy pki template files to a backup directory
+## For kubernetes copy pki template files to a backup directory
 RUN cp -a --no-preserve=ownership /etc/pki/ovirt-engine /etc/pki/ovirt-engine.tmpl
 
 # Persist this folder to keep the generated TLS certificates on the first start
@@ -142,4 +154,4 @@ ENV HTTPS_PORT 8443
 ENV SSO_ALTERNATE_ENGINE_FQDNS="" 
 #"localhost:8443 127.0.0.1:8443 ovirtengine.qnap:8443"
 
-CMD /usr/sbin/init #; bash /entrypoint.sh
+CMD /usr/sbin/init

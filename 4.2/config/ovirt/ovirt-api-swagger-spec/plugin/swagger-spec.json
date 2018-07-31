@@ -1,0 +1,12 @@
+{
+    // Unique name of the plugin
+    "name": "swagger-spec",
+
+    // URL of plugin host page that bootstraps plugin code
+    // This URL maps to $ENGINE_USR/ui-plugins/swagger-spec-resources/index.html
+    "url": "plugin/swagger-spec/index.html",
+
+    // Path to plugin resource files relative to descriptor
+    // This path maps to $ENGINE_USR/ui-plugins/space-shooter-resources
+    "resourcePath": "swagger-spec-resources"
+}

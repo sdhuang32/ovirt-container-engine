@@ -13,41 +13,77 @@
 #}
 
 usage(){
-    echo "usage: $0 <node number> <master node hostname/IP>"
-    echo "  <node number>: integer from 1 to upper bound.>"
-    echo "  <master node hostname/IP>: if not specified, this node will be treated as master.>"
+    echo "usage: $0 -i <node index> [-m master node hostname/IP] [-d QPKG date]"
+    echo "  <node index>: integer from 1 to upper bound."
+    echo "  [master node hostname/IP]: if not specified, this node will be treated as master."
+    echo "  [QPKG date]: if not specified, use date of today according to this node."
+    echo "  e.g."
+    echo "      $0 -i 1"
+    echo "      $0 -i 1 -d 20180707"
+    echo "      $0 -i 2 -m 10.0.5.2 -d 20180707"
+
+    exit 1
 }
 
 NODE_NUMBER=""
 MASTER_NODE=""
-if [ $# -lt 1 -o $# -gt 2 ]; then
+QPKG_DATE=""
+while getopts ":i:m:d:" arg; do
+    case "${arg}" in
+        i)
+            NODE_NUMBER=${OPTARG}
+            ;;
+        m)
+            MASTER_NODE=${OPTARG}
+            ;;
+        d)
+            QPKG_DATE=${OPTARG}
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+if [ $# -gt 0 ]; then
     usage
-    exit 1
-elif [ $# -eq 2 ]; then
-    MASTER_NODE="$2"
 fi
-NODE_NUMBER=$1
+
+if [ -z "${NODE_NUMBER}" ]; then
+    usage
+fi
 
 set -e
 
 QCS_REGISTRY="192.168.81.147:3200"
-REPO_NAME="daily-qcs-ovirt-engine"
+ENGINE_REPO_NAME="daily-qcs-ovirt-engine-separated"
+POSTGRES_REPO_NAME="daily-qcs-postgres-separated"
+
 year=$(date '+%Y')
 month=$(date '+%m')
 day=$(date '+%d')
+if [ -n "${QPKG_DATE}" ]; then
+    year=$(date --date="${QPKG_DATE}" "+%Y")
+    month=$(date --date="${QPKG_DATE}" "+%m")
+    day=$(date --date="${QPKG_DATE}" "+%d")
+fi
 
-system-docker pull ${QCS_REGISTRY}/${REPO_NAME}:${year}${month}${day}
+system-docker pull ${QCS_REGISTRY}/${POSTGRES_REPO_NAME}:${year}${month}${day}
+system-docker pull ${QCS_REGISTRY}/${ENGINE_REPO_NAME}:${year}${month}${day}
 echo "Create Container"
-system-docker run --name ovirt-engine  --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro --network="bridge" -p 8443:8443 -d ${QCS_REGISTRY}/${REPO_NAME}:${year}${month}${day}
+system-docker run --name ovirt-postgres --privileged -d ${QCS_REGISTRY}/${POSTGRES_REPO_NAME}:${year}${month}${day}
+system-docker run --name ovirt-engine --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro --link ovirt-postgres:postgres --network="bridge" --add-host="qcvm.local:127.0.0.1" -p 8443:8443 -d ${QCS_REGISTRY}/${ENGINE_REPO_NAME}:${year}${month}${day}
 
 echo "Sleep 3 seconds for container running"
 sleep 3
-if [ $# -eq 1 ]; then
-    system-docker exec -tid ovirt-engine bash /entrypoint.sh ${NODE_NUMBER}
+if [ -z ${MASTER_NODE} ]; then
+    system-docker exec -t ovirt-postgres bash /entrypoint.sh ${NODE_NUMBER}
+    sleep 1
+    system-docker exec -t ovirt-engine bash /entrypoint.sh ${NODE_NUMBER}
 else
-    system-docker exec -tid ovirt-engine bash /entrypoint.sh ${NODE_NUMBER} ${MASTER_NODE}
+    system-docker exec -t ovirt-postgres bash /entrypoint.sh ${NODE_NUMBER} ${MASTER_NODE}
+    sleep 1
+    system-docker exec -t ovirt-engine bash /entrypoint.sh ${NODE_NUMBER}
 fi
 
-
-IP=$(ifconfig | grep -A 1 'eth1' | tail -1 | awk '{print$2}')
-echo ${IP:5}

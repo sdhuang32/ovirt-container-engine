@@ -1,7 +1,7 @@
 cluster=qcs
 node=NODE_NUMBER
 node_name=NODE_NAME
-conninfo='host=NODE_ADDRESS user=repmgr dbname=repmgr'
+conninfo='host=NODE_ADDRESS user=repmgr dbname=repmgr connect_timeout=2'
 
 failover=automatic
 promote_command='repmgr standby promote -f /etc/repmgr.conf'

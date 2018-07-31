@@ -1,5 +1,0 @@
-local replication repmgr trust
-host replication repmgr all trust
-
-local repmgr repmgr trust
-host repmgr repmgr all trust

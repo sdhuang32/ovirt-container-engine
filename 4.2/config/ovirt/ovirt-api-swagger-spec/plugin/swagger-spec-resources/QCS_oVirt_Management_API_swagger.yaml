@@ -1,0 +1,4990 @@
+swagger: '2.0'
+info:
+  title: QCS oVirt Management API
+#  description: QCS oVirt Management API
+#  contact:
+#    url: 'http://www.ovirt.org'
+#    email: users@ovirt.org
+  version: '4.0.5'
+#  license:
+#    name: Apache 2.0
+#    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+# host: petstore.swagger.io
+basePath: /ovirt-engine/api
+tags:
+- name: 'AffinityGroup'
+  description: 'This service manages a single affinity group.'
+- name: 'Statistic'
+  description: ''
+- name: 'Tag'
+  description: ''
+- name: 'Vm'
+  description: ''
+schemes:
+  - https
+consumes:
+  - application/xml
+  - application/json
+produces:
+  - application/xml
+  - application/json
+security: 
+  - basicAuth: []
+paths:
+  /clusters/{clusterId}:
+    get:
+      description: |-
+        Get cluster's configuration.
+      parameters:
+      - name: 'clusterId'
+        in: 'path'
+        required: true
+        type : 'string'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Cluster'
+    put:
+      description: |-
+        Update cluster's configuration.
+      parameters:
+      - name: clusterId
+        in: path
+        required: true
+        type : string
+      - name: cluster
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/Cluster'
+      responses:
+        '200':
+          description: OK
+
+  /datacenters:
+    post:
+      description: |-
+        Creates a new data center.
+
+        Creation of a new data center requires the `name` and `local` elements. For example, to create a data center
+        named `mydc` that uses shared storage (NFS, iSCSI or fibre channel) send a request like this:
+
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/datacenters
+        ```
+        ----
+
+        With a request body like this:
+
+        [source,xml]
+        ----
+        ```
+        <data_center>
+          <name>mydc</name>
+          <local>false</local>
+        </data_center>
+        ```
+        ----
+      parameters:
+        - in: body
+          name: vm
+          #escription:
+          required: true
+          schema:
+            $ref: '#/definitions/DataCenter'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/DataCenter'
+    get:
+      description: |-
+        Lists the data centers.
+
+        The following request retrieves a representation of the data centers:
+
+        [source]
+        ----
+        ```
+        GET /ovirt-engine/api/datacenters
+        ```
+        ----
+
+        The above request performed with `curl`:
+
+        [source,bash]
+        ----
+        ```
+        curl \
+        --request GET \
+        --cacert /etc/pki/ovirt-engine/ca.pem \
+        --header "Version: 4" \
+        --header "Accept: application/xml" \
+        --user "admin@internal:mypassword" \
+        https://myengine.example.com/ovirt-engine/api/datacenters
+        ```
+        ----
+
+        This is what an example response could look like:
+
+        [source,xml]
+        ----
+        ```
+        <data_center href="/ovirt-engine/api/datacenters/123" id="123">
+          <name>Default</name>
+          <description>The default Data Center</description>
+          <link href="/ovirt-engine/api/datacenters/123/networks" rel="networks"/>
+          <link href="/ovirt-engine/api/datacenters/123/storagedomains" rel="storagedomains"/>
+          <link href="/ovirt-engine/api/datacenters/123/permissions" rel="permissions"/>
+          <link href="/ovirt-engine/api/datacenters/123/clusters" rel="clusters"/>
+          <link href="/ovirt-engine/api/datacenters/123/qoss" rel="qoss"/>
+          <link href="/ovirt-engine/api/datacenters/123/iscsibonds" rel="iscsibonds"/>
+          <link href="/ovirt-engine/api/datacenters/123/quotas" rel="quotas"/>
+          <local>false</local>
+          <quota_mode>disabled</quota_mode>
+          <status>up</status>
+          <supported_versions>
+            <version>
+              <major>4</major>
+              <minor>0</minor>
+            </version>
+          </supported_versions>
+          <version>
+            <major>4</major>
+            <minor>0</minor>
+          </version>
+        </data_center>
+        ```
+        ----
+
+        Note the `id` code of your `Default` data center. This code identifies this data center in relation to other
+        resources of your virtual environment.
+
+        The data center also contains a link to the storage domains collection. The data center uses this collection to
+        attach storage domains from the storage domains main collection.
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/DataCenter'
+
+  '/datacenters/{datacenterId}':
+    get:
+      description: |-
+        Get a data center.
+
+        An example of getting a data center:
+
+        [source]
+        ----
+        ```
+        GET /ovirt-engine/api/datacenters/123
+        ```
+        ----
+
+        [source,xml]
+        ----
+        ```
+        <data_center href="/ovirt-engine/api/datacenters/123" id="123">
+          <name>Default</name>
+          <description>The default Data Center</description>
+          <link href="/ovirt-engine/api/datacenters/123/clusters" rel="clusters"/>
+          <link href="/ovirt-engine/api/datacenters/123/storagedomains" rel="storagedomains"/>
+          <link href="/ovirt-engine/api/datacenters/123/permissions" rel="permissions"/>
+          <link href="/ovirt-engine/api/datacenters/123/networks" rel="networks"/>
+          <link href="/ovirt-engine/api/datacenters/123/quotas" rel="quotas"/>
+          <link href="/ovirt-engine/api/datacenters/123/qoss" rel="qoss"/>
+          <link href="/ovirt-engine/api/datacenters/123/iscsibonds" rel="iscsibonds"/>
+          <local>false</local>
+          <quota_mode>disabled</quota_mode>
+          <status>up</status>
+          <storage_format>v3</storage_format>
+          <supported_versions>
+            <version>
+              <major>4</major>
+              <minor>0</minor>
+           </version>
+          </supported_versions>
+          <version>
+            <major>4</major>
+            <minor>0</minor>
+          </version>
+          <mac_pool href="/ovirt-engine/api/macpools/456" id="456"/>
+        </data_center>
+        ```
+        ----
+      parameters:
+        - name: datacenterId
+          in: path
+          description: ID of datacenter
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/DataCenter'
+    delete:
+      description: |-
+        Removes the data center.
+
+        [source]
+        ----
+        ```
+        DELETE /ovirt-engine/api/datacenters/123
+        ```
+        ----
+
+        Without any special parameters, the storage domains attached to the data center are detached and then removed
+        from the storage. If something fails when performing this operation, for example if there is no host available to
+        remove the storage domains from the storage, the complete operation will fail.
+
+        If the `force` parameter is `true` then the operation will always succeed, even if something fails while removing
+        one storage domain, for example. The failure is just ignored and the data center is removed from the database
+        anyway.
+      parameters:
+        - name: datacenterId
+          in: path
+          description: ID of datacenter
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+    put:
+      description: |-
+        Updates the data center.
+
+        The `name`, `description`, `storage_type`, `version`, `storage_format` and `mac_pool` elements are updatable
+        post-creation. For example, to change the name and description of data center `123` send a request like this:
+
+        [source]
+        ----
+        ```
+        PUT /ovirt-engine/api/datacenters/123
+        ```
+        ----
+
+        With a request body like this:
+
+        [source,xml]
+        ----
+        ```
+        <data_center>
+          <name>myupdatedname</name>
+          <description>An updated description for the data center</description>
+        </data_center>
+        ```
+        ----
+      parameters:
+        - name: datacenterId
+          in: path
+          description: ID of datacenter
+          required: true
+          type: string
+          format: uuid
+        - in: body
+          name: datacenter
+          #escription:
+          required: true
+          schema:
+            $ref: '#/definitions/DataCenter'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/DataCenter'
+
+  '/datacenters/{datacenterId}/qoss':
+    post:
+      description: |-
+        Add a new QoS to the dataCenter.
+
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/datacenters/123/qoss
+        ```
+        ----
+
+        The response will look as follows:
+
+        [source,xml]
+        ----
+        ```
+        <qos href="/ovirt-engine/api/datacenters/123/qoss/123" id="123">
+          <name>123</name>
+          <description>123</description>
+          <max_iops>10</max_iops>
+          <type>storage</type>
+          <data_center href="/ovirt-engine/api/datacenters/123" id="123"/>
+        </qos>
+        ```
+        ----
+      parameters:
+        - name: datacenterId
+          in: path
+          description: ID of datacenter
+          required: true
+          type: string
+          format: uuid
+        - in: body
+          name: Qos
+          #escription:
+          required: true
+          schema:
+            $ref: '#/definitions/Qos'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/Qos'
+    get:
+      description: |-
+        List all available QoS objects in the datacenter.
+
+        [source]
+        ----
+        ```
+        GET /ovirt-engine/api/datacenter/123/qoss
+        ```
+        ----
+
+        You will get response which will look like this:
+
+        [source, xml]
+        ----
+        ```
+        <qoss>
+          <qos href="/ovirt-engine/api/datacenters/123/qoss/1" id="1">...</qos>
+          <qos href="/ovirt-engine/api/datacenters/123/qoss/2" id="2">...</qos>
+          <qos href="/ovirt-engine/api/datacenters/123/qoss/3" id="3">...</qos>
+        </qoss>
+        ```
+        ----
+      parameters:
+        - name: datacenterId
+          in: path
+          description: ID of datacenter
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Qos'
+
+  '/datacenters/{datacenterId}/qoss/{qosId}':
+    get:
+      description: |-
+        Get specified QoS in the data center.
+
+        [source]
+        ----
+        ```
+        GET /ovirt-engine/api/datacenters/123/qoss/123
+        ```
+        ----
+
+        You will get response like this one below:
+
+        [source,xml]
+        ----
+        ```
+        <qos href="/ovirt-engine/api/datacenters/123/qoss/123" id="123">
+          <name>123</name>
+          <description>123</description>
+          <max_iops>1</max_iops>
+          <max_throughput>1</max_throughput>
+          <type>storage</type>
+          <data_center href="/ovirt-engine/api/datacenters/123" id="123"/>
+        </qos>
+        ```
+        ----
+      parameters:
+        - name: datacenterId
+          in: path
+          description: ID of datacenter
+          required: true
+          type: string
+          format: uuid
+        - name: qosId
+          in: path
+          description: ID of Qos object
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Qos'
+    delete:
+      description: |-
+        Remove specified QoS from datacenter.
+
+        [source]
+        ----
+        ```
+        DELETE /ovirt-engine/api/datacenters/123/qoss/123
+        ```
+        ----
+      parameters:
+        - name: datacenterId
+          in: path
+          description: ID of datacenter
+          required: true
+          type: string
+          format: uuid
+        - name: qosId
+          in: path
+          description: ID of Qos object
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+    put:
+      description: |-
+        Update the specified QoS in the dataCenter.
+
+        [source]
+        ----
+        ```
+        PUT /ovirt-engine/api/datacenters/123/qoss/123
+        ```
+        ----
+
+        For example with curl:
+
+        [source]
+        ----
+        ```
+        curl -u admin@internal:123456 -X PUT -H "content-type: application/xml" -d \
+        "<qos><name>321</name><description>321</description><max_iops>10</max_iops></qos>" \
+        https://engine/ovirt-engine/api/datacenters/123/qoss/123
+        ```
+        ----
+
+        You will receive response like this:
+
+        [source,xml]
+        ----
+        ```
+        <qos href="/ovirt-engine/api/datacenters/123/qoss/123" id="123">
+          <name>321</name>
+          <description>321</description>
+          <max_iops>10</max_iops>
+          <max_throughput>1</max_throughput>
+          <type>storage</type>
+          <data_center href="/ovirt-engine/api/datacenters/123" id="123"/>
+        </qos>
+        ```
+        ----
+      parameters:
+        - name: datacenterId
+          in: path
+          description: ID of datacenter
+          required: true
+          type: string
+          format: uuid
+        - name: qosId
+          in: path
+          description: ID of Qos object
+          required: true
+          type: string
+          format: uuid
+        - in: body
+          name: Qos
+          #escription:
+          required: true
+          schema:
+            $ref: '#/definitions/Qos'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Qos'
+
+  '/datacenters/{datacenterId}/quotas':
+    post:
+      description: |-
+        Creates a new quota.
+
+        An example of creating a new quota:
+
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/datacenters/123/quotas
+        ```
+        ----
+
+        [source,xml]
+        ----
+        ```
+        <quota>
+          <name>myquota</name>
+          <description>My new quota for virtual machines</description>
+        </quota>
+        ```
+        ----
+      parameters:
+        - name: datacenterId
+          in: path
+          description: ID of datacenter
+          required: true
+          type: string
+          format: uuid
+        - in: body
+          name: Quota
+          #escription:
+          required: true
+          schema:
+            $ref: '#/definitions/Quota'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/Quota'
+    get:
+      description: Lists quotas of a data center
+      parameters:
+        - name: datacenterId
+          in: path
+          description: ID of datacenter
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Quota'
+
+  '/datacenters/{datacenterId}/quotas/{quotaId}':
+    get:
+      description: |-
+        Retrieves a quota.
+
+        An example of retrieving a quota:
+
+        [source]
+        ----
+        GET /ovirt-engine/api/datacenters/123/quotas/456
+        ----
+
+        [source,xml]
+        ----
+        <quota id="456">
+          <name>myquota</name>
+          <description>My new quota for virtual machines</description>
+          <cluster_hard_limit_pct>20</cluster_hard_limit_pct>
+          <cluster_soft_limit_pct>80</cluster_soft_limit_pct>
+          <storage_hard_limit_pct>20</storage_hard_limit_pct>
+          <storage_soft_limit_pct>80</storage_soft_limit_pct>
+        </quota>
+        ----
+      parameters:
+        - name: datacenterId
+          in: path
+          description: ID of datacenter
+          required: true
+          type: string
+          format: uuid
+        - name: quotaId
+          in: path
+          description: ID of quota
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Quota'
+    delete:
+      description: |-
+        Delete a quota.
+
+        An example of deleting a quota:
+
+        [source]
+        ----
+        DELETE /ovirt-engine/api/datacenters/123-456/quotas/654-321
+        -0472718ab224 HTTP/1.1
+        Accept: application/xml
+        Content-type: application/xml
+        ----
+      parameters:
+        - name: datacenterId
+          in: path
+          description: ID of datacenter
+          required: true
+          type: string
+          format: uuid
+        - name: quotaId
+          in: path
+          description: ID of quota
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+    put:
+      description: |-
+        Updates a quota.
+
+        An example of updating a quota:
+
+        [source]
+        ----
+        PUT /ovirt-engine/api/datacenters/123/quotas/456
+        ----
+
+        [source,xml]
+        ----
+        <quota>
+          <cluster_hard_limit_pct>30</cluster_hard_limit_pct>
+          <cluster_soft_limit_pct>70</cluster_soft_limit_pct>
+          <storage_hard_limit_pct>20</storage_hard_limit_pct>
+          <storage_soft_limit_pct>80</storage_soft_limit_pct>
+        </quota>
+        ----
+      parameters:
+        - name: datacenterId
+          in: path
+          description: ID of datacenter
+          required: true
+          type: string
+          format: uuid
+        - name: quotaId
+          in: path
+          description: ID of quota
+          required: true
+          type: string
+          format: uuid
+        - in: body
+          name: Quota
+          #escription:
+          required: true
+          schema:
+            $ref: '#/definitions/Quota'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Quota'
+
+  '/datacenters/{datacenterId}/quotas/{quotaId}/quotaclusterlimits':
+    post:
+      description: Add a cluster limit to a specified Quota.
+      parameters:
+        - name: datacenterId
+          in: path
+          description: ID of datacenter
+          required: true
+          type: string
+          format: uuid
+        - name: quotaId
+          in: path
+          description: ID of quota
+          required: true
+          type: string
+          format: uuid
+        - in: body
+          name: QuotaClusterLimit
+          #escription:
+          required: true
+          schema:
+            $ref: '#/definitions/QuotaClusterLimit'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/QuotaClusterLimit'
+    get:
+      parameters:
+        - name: datacenterId
+          in: path
+          description: ID of datacenter
+          required: true
+          type: string
+          format: uuid
+        - name: quotaId
+          in: path
+          description: ID of quota
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/QuotaClusterLimit'
+
+  '/datacenters/{datacenterId}/quotas/{quotaId}/quotaclusterlimits/{limitId}':
+    get:
+      parameters:
+        - name: datacenterId
+          in: path
+          description: ID of datacenter
+          required: true
+          type: string
+          format: uuid
+        - name: quotaId
+          in: path
+          description: ID of quota
+          required: true
+          type: string
+          format: uuid
+        - name: limitId
+          in: path
+          description: ID of QuotaClusterLimit object
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/QuotaClusterLimit'
+    delete:
+      parameters:
+        - name: datacenterId
+          in: path
+          description: ID of datacenter
+          required: true
+          type: string
+          format: uuid
+        - name: quotaId
+          in: path
+          description: ID of quota
+          required: true
+          type: string
+          format: uuid
+        - name: limitId
+          in: path
+          description: ID of QuotaClusterLimit object
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+
+  /clusters/{clusterId}/affinitygroups:
+    post:
+      tags:
+      - 'AffinityGroup'
+      description: |-
+        Create a new affinity group.  
+      
+        Post a request like in the example below to create a new affinity group:
+
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/clusters/000-000/affinitygroups
+        ```
+        ----
+
+        And use the following example in its body:
+
+        [source,xml]
+        ----
+        ```
+        <affinity_group>
+          <name>AF_GROUP_001</name>
+          <positive>true</positive>
+          <enforcing>true</enforcing>
+        </affinity_group>
+        ```
+        ----
+      parameters: 
+      - name: 'clusterId'
+        in: 'path'
+        required: true
+        type : 'string'
+      - name: 'affinitygroup'
+        in: 'body'
+        required: true
+        schema:
+          $ref: '#/definitions/AffinityGroup'
+      responses:
+        201:
+          description: 'Created'
+    get:
+      tags:
+      - 'AffinityGroup'
+      description: 'List existing affinity groups.'
+      parameters:
+      - name: 'clusterId'
+        in: 'path'
+        required: true
+        type : 'string'
+      responses:
+        200:
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/AffinityGroup'
+
+  /clusters/{clusterId}/affinitygroups/{groupId}:
+    get:
+      tags:
+      - 'AffinityGroup'
+      description: |-
+        Retrieve the affinity group details.
+
+        [source,xml]
+        ----
+        ```
+        <affinity_group id="00000000-0000-0000-0000-000000000000">
+          <name>AF_GROUP_001</name>
+          <cluster id="00000000-0000-0000-0000-000000000000"/>
+          <positive>true</positive>
+          <enforcing>true</enforcing>
+        </affinity_group>
+        ```
+        ----
+      parameters: 
+        - name: 'clusterId'
+          in: 'path'
+          required: true
+          type : 'string'
+        - name: 'groupId'
+          in: 'path'
+          required: true
+          type : 'string'
+      responses:
+        200:
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/AffinityGroup'
+    delete:
+      tags:
+      - 'AffinityGroup'
+      description: |-
+        Remove the affinity group.
+
+        [source]
+        ----
+        ```
+        DELETE /ovirt-engine/api/clusters/000-000/affinitygroups/123-456
+        ```
+        ----
+      parameters:
+        - name: 'clusterId'
+          in: 'path'
+          required: true
+          type : 'string'
+        - name: 'groupId'
+          in: 'path'
+          required: true
+          type : 'string'
+      responses:
+        200:
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/AffinityGroup'
+    put:
+      tags:
+      - 'AffinityGroup'
+      description: |-
+        Update the affinity group.
+        
+        Put a request like in the example below to update affinity group:
+
+        [source]
+        ----
+        ```
+        PUT /ovirt-engine/api/clusters/000-000/affinitygroups/123
+        ```
+        ----
+
+        And use the following example in its body:
+
+        [source,xml]
+        ----
+        ```
+        <affinity_group>
+          <name>AF_GROUP_001</name>
+          <positive>true</positive>
+          <enforcing>true</enforcing>
+        </affinity_group>
+        ```
+        ----
+      parameters: 
+        - name: 'clusterId'
+          in: 'path'
+          required: true
+          type : 'string'
+        - name: 'groupId'
+          in: 'path'
+          required: true
+          type : 'string'
+        - name: 'affinitygroup'
+          in: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/AffinityGroup'
+      responses: 
+        200:
+          description: 'OK'
+      
+  /clusters/{clusterId}/affinitygroups/{groupId}/vms:
+    post:
+      tags:
+      - 'AffinityGroup'
+      description: |-
+        Adds a virtual machine to the affinity group.
+
+        For example, to add the virtual machine `789` to the affinity group `456` of cluster `123`, send a request like this:
+
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/clusters/123/affinitygroups/456/vms
+        ```
+        ----
+
+        With the following body:
+        
+        [source,xml]
+        ----
+        ```
+        <vm id="789"/>
+        ```
+        ----
+      parameters:
+        - name: 'clusterId'
+          in: 'path'
+          required: true
+          type : 'string'
+        - name: 'groupId'
+          in: 'path'
+          required: true
+          type : 'string'
+        - name: 'Vm'
+          in: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/Vm'
+      responses: 
+        200:
+          description: 'OK'
+    get:
+      tags:
+      - 'AffinityGroup'
+      description: 'List all virtual machines assigned to this affinity group.'
+      parameters:
+        - name: 'clusterId'
+          in: 'path'
+          required: true
+          type : 'string'
+        - name: 'groupId'
+          in: 'path'
+          required: true
+          type : 'string'
+      responses: 
+        200:
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Vm' 
+
+  /clusters/{clusterId}/affinitygroups/{groupId}/vms/{vmId}:
+    delete:
+      tags:
+      - 'AffinityGroup'
+      description: 'Remove this virtual machine from the affinity group.'
+      parameters:
+        - name: 'clusterId'
+          in: 'path'
+          required: true
+          type : 'string'
+        - name: 'groupId'
+          in: 'path'
+          required: true
+          type : 'string'
+        - name: 'vmId'
+          in: 'path'
+          required: true
+          type : 'string'
+      responses: 
+        200:
+          description: 'OK'
+  '/diskprofiles':
+    get:
+      description: |-
+        List all available diskprofile objects.
+
+        [source]
+        ----
+        ```
+        GET /ovirt-engine/api/diskprofiles
+        ```
+        ----
+
+        You will get response which will look like this:
+
+        [source, xml]
+        ----
+        ```
+        <disk_profiles>
+          <disk_profile href="/ovirt-engine/api/diskprofiles/1" id="1">...</disk_profile>
+          <disk_profile href="/ovirt-engine/api/diskprofiles/2" id="2">...</disk_profile>
+          <disk_profile href="/ovirt-engine/api/diskprofiles/3" id="3">...</disk_profile>
+        </disk_profiles>
+        ```
+        ----
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/DiskProfile'
+    post:
+      description: |-
+        Add a new diskprofile to storage domain.
+
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/diskprofiles
+        ```
+        ----
+
+        The response will look as follows:
+
+        [source,xml]
+        ----
+        ```
+        <disk_profile href="/ovirt-engine/api/diskprofiles/123" id="123">
+          <name>disk-profile14</name>
+          <qos id="456"/>
+          <storage_domain href="/ovirt-engine/api/storagedomains/789" id="789"/>
+        </disk_profile>
+        ```
+        ----
+      parameters:
+        - name: DiskProfile
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DiskProfile'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/DiskProfile'
+  '/diskprofiles/{diskprofileId}':
+    put:
+      description: |-
+        Modify diskprofile.
+
+        [source]
+        ----
+        ```
+        PUT /ovirt-engine/api/diskprofiles/{diskprofileId}
+        ```
+        ----
+
+        The response will look as follows:
+
+        [source,xml]
+        ----
+        ```
+        <disk_profile href="/ovirt-engine/api/diskprofiles/123" id="123">
+          <name>disk-profile11</name>
+          <link href="/ovirt-engine/api/diskprofiles/123/permissions" rel="permissions"/>
+          <qos href="/ovirt-engine/api/datacenters/456/qoss/789" id="789"/>
+          <storage_domain href="/ovirt-engine/api/storagedomains/abc" id="abc"/>
+        </disk_profile>
+        ```
+        ----
+      parameters:
+        - name: diskprofileId
+          in: path
+          description: ID of diskprofile
+          required: true
+          type: string
+          format: uuid
+        - name: DiskProfile
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DiskProfile'
+      responses:
+        '200':
+          description: OK
+  /externalvmimports:
+    post:
+      description: |-
+        This operation is used to import a virtual machine from external hypervisor, such as KVM, XEN or VMware.
+
+        For example import of a virtual machine from VMware can be facilitated using the following request:
+
+        [source]
+        ----
+        ```
+        POST /externalvmimports
+        ```
+        ----
+
+        With request body of type <<types/external_vm_import,ExternalVmImport>>, for example:
+
+        [source,xml]
+        ----
+        ```
+        <external_vm_import>
+          <vm>
+            <name>my_vm</name>
+          </vm>
+          <cluster id="360014051136c20574f743bdbd28177fd" />
+          <storage_domain id="8bb5ade5-e988-4000-8b93-dbfc6717fe50" />
+          <name>vm_name_as_is_in_vmware</name>
+          <sparse>true</sparse>
+          <username>vmware_user</username>
+          <password>123456</password>
+          <provider>VMWARE</provider>
+          <url>vpx://wmware_user@vcenter-host/DataCenter/Cluster/esxi-host?no_verify=1</url>
+          <drivers_iso id="virtio-win-1.6.7.iso" />
+        </external_vm_import>
+        ```
+        ----
+
+        If you want to import an OVA produced by VMware, and let's say that it is located in /home/user/vm.ova on host `123`; you can send the request body like the this:
+        ```
+        <external_vm_import>
+          <cluster id="360014051136c20574f743bdbd28177fd" />
+          <storage_domain id="8bb5ade5-e988-4000-8b93-dbfc6717fe50" />
+          <host id="123"/>
+          <name>new_vm_name</name>
+          <sparse>true</sparse>
+          <provider>vmware</provider>
+          <url>ova:///home/user/vm.ova</url>
+        </external_vm_import>
+        ```
+      parameters:
+        - in: body
+          name: ExternalVmImport
+          #escription:
+          required: true
+          schema:
+            $ref: '#/definitions/ExternalVmImport'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/ExternalVmImport'
+
+  '/schedulingpolicies':
+    get:
+      description: |-
+        Lists available scheduling policies.
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/SchedulingPolicy'
+    post:
+      description: |-
+        Add a new scheduling policy to the system.
+      parameters:
+        - name: policy
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/SchedulingPolicy'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SchedulingPolicy'
+  '/schedulingpolicies/{schedulingpolicyId}':
+    get:
+      description: |-
+        Retrieves configuration of the scheduling policy.
+      parameters:
+        - name: schedulingpolicyId
+          in: path
+          description: ID of Scheduling Policy
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/SchedulingPolicy'
+    put:
+      description: |-
+        Update configurations of the scheduling policy.
+      parameters:
+        - name: schedulingpolicyId
+          in: path
+          description: ID of Scheduling Policy
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SchedulingPolicy'
+
+  '/storagedomains/{storagedomainId}/vms':
+    get:
+      description: |-
+        Lists the virtual machines of an export storage domain.
+
+        For example, to retrieve the virtual machines that are available in the storage domain with identifier `123` send the following request:
+
+        [source]
+        ----
+        ```
+        GET /ovirt-engine/api/storagedomains/123/vms
+        ```
+        ----
+
+        This will return the following response body:
+
+        [source,xml]
+        ----
+        ```
+        <vms>
+          <vm id="456" href="/api/storagedomains/123/vms/456">
+            <name>vm1</name>
+            ...
+            <storage_domain id="123" href="/api/storagedomains/123"/>
+            <actions>
+              <link rel="import" href="/api/storagedomains/123/vms/456/import"/>
+            </actions>
+          </vm>
+        </vms>
+        ```
+        ----
+
+        Virtual machines and templates in these collections have a similar representation to their counterparts in the
+        top-level `Vm` and `Template` collections, except they also contain a
+        `StorageDomain` reference and an `import` action.
+      parameters:
+        - name: storagedomainId
+          in: path
+          description: ID of storage domain
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Vm'
+  '/storagedomains/{storagedomainId}/vms/{vmId}':
+    get:
+      parameters:
+        - name: storagedomainId
+          in: path
+          description: ID of storage domain
+          required: true
+          type: string
+          format: uuid
+        - name: vmId
+          in: path
+          description: ID of VM
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Vm'
+    delete:
+      description: |-
+        Deletes a virtual machine from an export storage domain.
+
+        For example, to delete the virtual machine `456` from the storage domain `123`, send a request like this:
+
+        [source]
+        ----
+        DELETE /ovirt-engine/api/storagedomains/123/vms/456
+        ----
+      parameters:
+        - name: storagedomainId
+          in: path
+          description: ID of storage domain
+          required: true
+          type: string
+          format: uuid
+        - name: vmId
+          in: path
+          description: ID of VM
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+
+  '/storagedomains/{storagedomainId}/vms/{vmId}/import':
+    post:
+      description: |-
+        Imports a virtual machine from an export storage domain.
+
+        For example, send a request like this:
+
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/storagedomains/123/vms/456/import
+        ```
+        ----
+
+        With a request body like this:
+
+        [source,xml]
+        ----
+        ```
+        <action>
+          <storage_domain>
+            <name>mydata</name>
+          </storage_domain>
+          <cluster>
+            <name>mycluster</name>
+          </cluster>
+        </action>
+        ```
+        ----
+
+        To import a virtual machine as a new entity add the `clone` parameter:
+
+        [source,xml]
+        ----
+        ```
+        <action>
+          <storage_domain>
+            <name>mydata</name>
+          </storage_domain>
+          <cluster>
+            <name>mycluster</name>
+          </cluster>
+          <clone>true</clone>
+          <vm>
+            <name>myvm</name>
+          </vm>
+        </action>
+        ```
+        ----
+
+        Include an optional `disks` parameter to choose which disks to import. For example, to import the disks
+        of the template that have the identifiers `123` and `456` send the following request body:
+
+        [source,xml]
+        ----
+        ```
+        <action>
+          <cluster>
+            <name>mycluster</name>
+          </cluster>
+          <vm>
+            <name>myvm</name>
+          </vm>
+          <disks>
+            <disk id="123"/>
+            <disk id="456"/>
+          </disks>
+        </action>
+        ```
+        ----
+      parameters:
+        - name: storagedomainId
+          in: path
+          description: ID of storage domain
+          required: true
+          type: string
+          format: uuid
+        - name: vmId
+          in: path
+          description: ID of VM
+          required: true
+          type: string
+          format: uuid
+        - name: action
+          in: body
+          schema:
+            type: object
+            properties:
+              clone:
+                description: |-
+                  Indicates if the identifiers of the imported virtual machine
+                  should be regenerated.
+
+                  By default when a virtual machine is imported the identifiers
+                  are preserved. This means that the same virtual machine can't
+                  be imported multiple times, as that identifiers needs to be
+                  unique. To allow importing the same machine multiple times set
+                  this parameter to `true`, as the default is `false`.
+                type: boolean
+              cluster:
+                $ref: '#/definitions/Cluster'
+              storage_domain:
+                $ref: '#/definitions/StorageDomain'
+              vm:
+                $ref: '#/definitions/Vm'
+              exclusive:
+                type: boolean
+              collapse_snapshots:
+                description: |-
+                  Indicates of the snapshots of the virtual machine that is imported
+                  should be collapsed, so that the result will be a virtual machine
+                  without snapshots.
+
+                  This parameter is optional, and if it isn't explicitly specified the
+                  default value is `false`.
+                type: boolean
+              async:
+                description: Indicates if the import should be performed asynchronously.
+                type: boolean
+      responses:
+        '202':
+          description: Accepted
+
+  /tags:
+    post:
+      tags:
+      - 'Tag'
+      description: |-
+        Add a new tag to the system.
+
+        For example, to add new tag with name `mytag` to the system send a request like this:
+
+        ----
+        ```
+        POST /ovirt-engine/api/tags
+        ```
+        ----
+
+        With a request body like this:
+
+        [source,xml]
+        ----
+        ```
+        <tag>
+          <name>mytag</name>
+        </tag>
+        ```
+        ----
+
+        NOTE: The root tag is a special pseudo-tag assumed as the default parent tag if no parent tag is specified.
+        The root tag cannot be deleted nor assigned a parent tag.
+
+        To create new tag with specific parent tag send a request body like this:
+
+        [source,xml]
+        ----
+        ```
+        <tag>
+          <name>mytag</name>
+          <parent>
+            <name>myparenttag</name>
+          </parent>
+        </tag>
+        ```
+        ----
+      parameters:
+        - name: 'tag'
+          in: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/Tag'
+      responses:
+        201:
+          description: 'Created'
+    get:
+      tags:
+      - 'Tag'
+      description: |-
+        List the tags in the system.
+
+        For example to list the full hierarchy of the tags in the system send a request like this:
+
+        ----
+        ```
+        GET /ovirt-engine/api/tags
+        ```
+        ----
+
+        [source,xml]
+        ----
+        ```
+        <tags>
+          <tag href="/ovirt-engine/api/tags/222" id="222">
+            <name>root2</name>
+            <description>root2</description>
+            <parent href="/ovirt-engine/api/tags/111" id="111"/>
+          </tag>
+          <tag href="/ovirt-engine/api/tags/333" id="333">
+            <name>root3</name>
+            <description>root3</description>
+            <parent href="/ovirt-engine/api/tags/222" id="222"/>
+          </tag>
+          <tag href="/ovirt-engine/api/tags/111" id="111">
+            <name>root</name>
+            <description>root</description>
+          </tag>
+        </tags>
+        ```
+        ----
+
+        In the previous XML output you can see the following hierarchy of the tags:
+        ----
+        ```
+        root:        (id: 111)
+          - root2    (id: 222)
+            - root3  (id: 333)
+        ```
+        ----
+      parameters: []
+      responses: 
+        200:
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Tag'
+  /tags/{tagId}:
+    get:
+      tags:
+      - 'Tag'
+      description: |-
+        Gets the information about the tag.
+
+        For example to retrieve the information about the tag with the id `123` send a request like this:
+
+        ----
+        ```
+        GET /ovirt-engine/api/tags/123
+        ```
+        ----
+
+        [source,xml]
+        ----
+        ```
+        <tag href="/ovirt-engine/api/tags/123" id="123">
+          <name>root</name>
+          <description>root</description>
+        </tag>
+        ```
+        ----
+      parameters:
+        - name: 'tagId'
+          in: 'path'
+          type: string
+          required: true
+      responses:
+        200:
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Tag'
+    delete:
+      tags:
+      - 'Tag'
+      description: |-
+        Removes the tag from the system.
+
+        For example to remove the tag with id `123` send a request like this:
+
+        ----
+        ```
+        DELETE /ovirt-engine/api/tags/123
+        ```
+        ----
+      parameters:
+        - name: 'tagId'
+          in: 'path'
+          type: string
+          required: true
+      responses: 
+        200:
+          description: 'OK'
+    put:
+      tags:
+      - 'Tag'
+      description: |-
+        Updates the tag entity.
+
+        For example to update parent tag to tag with id `456` of the tag with id `123` send a request like this:
+
+        ----
+        ```
+        PUT /ovirt-engine/api/tags/123
+        ```
+        ----
+
+        With request body like:
+
+        [source,xml]
+        ----
+        ```
+        <tag>
+          <parent id="456"/>
+        </tag>
+        ```
+        ----
+
+        You may also specify a tag name instead of id. For example to update parent tag to tag with name `mytag`
+        of the tag with id `123` send a request like this:
+
+        [source,xml]
+        ----
+        ```
+        <tag>
+          <parent>
+            <name>mytag</name>
+          </parent>
+        </tag>
+        ```
+        ----
+      parameters:
+        - name: 'tagId'
+          in: 'path'
+          type: string
+          required: true
+        - name: 'tag'
+          in: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/Tag'
+      responses: 
+        200:
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Tag'
+
+  /vms:
+    post:
+      tags:
+      - 'Vm'
+      description: |-
+        Creates a new virtual machine.
+
+        The virtual machine can be created in different ways:
+
+        - From a template. In this case the identifier or name of the template must be provided. For example, using a
+          plain shell script and XML:
+
+        [source,bash]
+        ----
+        ```
+        #!/bin/sh -ex
+
+        url="https://engine.example.com/ovirt-engine/api"
+        user="admin@internal"
+        password="..."
+        curl \
+        --verbose \
+        --cacert /etc/pki/ovirt-engine/ca.pem \
+        --user "${user}:${password}" \
+        --request POST \
+        --header "Version: 4" \
+        --header "Content-Type: application/xml" \
+        --header "Accept: application/xml" \
+        --data '
+        <vm>
+          <name>myvm</name>
+          <template>
+            <name>Blank</name>
+          </template>
+          <cluster>
+            <name>mycluster</name>
+          </cluster>
+        </vm>
+        ' \
+        "${url}/vms"
+        ```
+        ----
+
+        - From a snapshot. In this case the identifier of the snapshot has to be provided. For example, using a plain
+          shell script and XML:
+
+        [source,bash]
+        ----
+        ```
+        #!/bin/sh -ex
+
+        url="https://engine.example.com/ovirt-engine/api"
+        user="admin@internal"
+        password="..."
+        curl \
+        --verbose \
+        --cacert /etc/pki/ovirt-engine/ca.pem \
+        --user "${user}:${password}" \
+        --request POST \
+        --header "Content-Type: application/xml" \
+        --header "Accept: application/xml" \
+        --data '
+        <vm>
+          <name>myvm</name>
+          <snapshots>
+            <snapshot id="266742a5-6a65-483c-816d-d2ce49746680"/>
+          </snapshots>
+          <cluster>
+            <name>mycluster</name>
+          </cluster>
+        </vm>
+        ' \
+        "${url}/vms"
+        ```
+        ----
+
+        When creating a virtual machine from a template or from a snapshot it is usually useful to explicitly indicate
+        in what storage domain to create the disks for the virtual machine. If the virtual machine is created from
+        a template then this is achieved passing a set of `disk_attachment` elements that indicate the mapping:
+
+        [source,xml]
+        ----
+        ```
+        <vm>
+          ...
+          <disk_attachments>
+            <disk_attachment>
+              <disk id="8d4bd566-6c86-4592-a4a7-912dbf93c298">
+                <storage_domains>
+                  <storage_domain id="9cb6cb0a-cf1d-41c2-92ca-5a6d665649c9"/>
+                </storage_domains>
+              </disk>
+            <disk_attachment>
+          </disk_attachments>
+        </vm>
+        ```
+        ----
+
+        When the virtual machine is created from a snapshot this set of disks is slightly different, it uses the
+        `image_id` attribute instead of `id`.
+
+        [source,xml]
+        ----
+        ```
+        <vm>
+          ...
+          <disk_attachments>
+            <disk_attachment>
+              <disk>
+                <image_id>8d4bd566-6c86-4592-a4a7-912dbf93c298</image_id>
+                <storage_domains>
+                  <storage_domain id="9cb6cb0a-cf1d-41c2-92ca-5a6d665649c9"/>
+                </storage_domains>
+              </disk>
+            <disk_attachment>
+          </disk_attachments>
+        </vm>
+        ```
+        ----
+
+        It is possible to specify additional virtual machine parameters in the XML description, e.g. a virtual machine
+        of `desktop` type, with 2 GiB of RAM and additional description can be added sending a request body like the
+        following:
+
+        [source,xml]
+        ----
+        ```
+        <vm>
+          <name>myvm</name>
+          <description>My Desktop Virtual Machine</description>
+          <type>desktop</type>
+          <memory>2147483648</memory>
+          ...
+        </vm>
+        ```
+        ----
+
+        A bootable CDROM device can be set like this:
+
+        [source,xml]
+        ----
+        ```
+        <vm>
+          ...
+          <os>
+            <boot dev="cdrom"/>
+          </os>
+        </vm>
+        ```
+        ----
+
+        In order to boot from CDROM, you first need to insert a disk, as described in the
+        <<services/vm_cdrom, CDROM service>>. Then booting from that CDROM can be specified using the `os.boot.devices` attribute:
+
+        [source,xml]
+        ----
+        ```
+        <vm>
+          ...
+          <os>
+            <boot>
+              <devices>
+                <device>cdrom</device>
+              </devices>
+            </boot>
+          </os>
+        </vm>
+        ```
+        ----
+
+        In all cases the name or identifier of the cluster where the virtual machine will be created is mandatory.
+      parameters:
+        - in: body
+          name: vm
+          #escription:
+          required: true
+          schema:
+            $ref: '#/definitions/Vm'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/Vm'
+    get:
+      tags: 
+      - 'Vm'
+      description: |-
+        List all VMs
+        
+        ----
+        ```
+        GET /ovirt-engine/api/vms
+        ```
+        ----
+        
+        The list method of some services has a search parameter that can be used to specify search criteria. When used, the server will only return objects within the collection that satisfy those criteria. For example, the following request will return only the Tag named mytag:
+        
+        ----
+        ```
+        GET /ovirt-engine/api/vms?search=mytag
+        ```
+        ----
+      parameters: 
+        - name: 'search'
+          in: 'query'
+          type: string
+      responses:
+        200:
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Vm'
+
+  /vms/{vmId}:
+    get:
+      tags:
+      - 'Vm'
+      description: Retrieves the description of the virtual machine.
+      parameters: 
+        - name: 'vmId'
+          in: 'path'
+          type: string
+          required: true
+      responses: 
+        200:
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Vm'
+    delete:
+      tags:
+      - 'Vm'
+      description: |-
+        Removes the virtual machine, including the virtual disks attached to it.
+
+        For example, to remove the virtual machine with identifier `123`:
+
+        [source]
+        ----
+        ```
+        DELETE /ovirt-engine/api/vms/123
+        ```
+        ----
+      parameters: 
+        - name: 'vmId'
+          in: 'path'
+          type: string
+          required: true
+      responses: 
+        200:
+          description: 'OK'
+    put:
+      tags:
+      - 'Vm'
+      description: Update the virtual machine in the system for the given virtual machine id.
+      parameters: 
+        - name: 'vmId'
+          in: 'path'
+          type: string
+          required: true
+        - name: 'Vm'
+          in: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/Vm'
+      responses:
+        '209':
+          description: 'OK'
+  /vms/{vmId}/clone:
+    post:
+      tags:
+      - 'Vm'
+      description: |-
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/vms/123/clone
+        ```
+        ----
+        
+        [source,xml]
+        ----
+        ```
+        <action>
+          <vm>
+            <name>myvm</name>
+            ...
+          </vm>
+        </action>
+        ```
+        ----
+      parameters:
+        - name: vmId
+          in: path
+          required: true
+          type: string
+        - name: action
+          in: body
+          schema:
+            type: object
+            properties:
+              vm:
+                $ref: '#/definitions/Vm'
+      responses: 
+        200:
+          description: 'OK'
+  '/vms/{vmId}/diskattachments/{diskattachmentId}':
+    delete:
+      tags:
+      - Vm
+      description: |-
+        Delete the disk attachment from the virtual machine.
+
+        [source]
+        ----
+        ```
+        DELETE /ovirt-engine/api/vms/123/diskattachments/456
+        ```
+        ----
+      parameters:
+        - name: diskattachmentId
+          in: path
+          required: true
+          type: string
+        - name: vmId
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+    get:
+      tags:
+      - Vm
+      description: |-
+        List information of single disk that attached to the virtual machine.
+
+        [source]
+        ----
+        ```
+        GET /ovirt-engine/api/vms/123/diskattachments/456
+        ```
+        ----
+      parameters:
+        - name: diskattachmentId
+          in: path
+          required: true
+          type: string
+        - name: vmId
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+    put:
+      tags:
+      - Vm
+      description: |-
+        Update disk attachment to the virtual machine. The `disk` parameter can contain just a reference, or modify disk setting in the same time.
+
+        [source]
+        ----
+        ```
+        PUT /ovirt-engine/api/vms/123/diskattachments/456
+        ```
+        ----
+        [source,xml]
+        ----
+        ```
+        <disk_attachment>
+          <bootable>true</bootable>
+          <pass_discard>true</pass_discard>
+          <interface>ide</interface>
+          <active>true</active>
+          <disk id="123">
+            <disk_profile id="456">
+          </disk>
+        </disk_attachment>
+        ```
+        ----
+      parameters:
+        - name: diskattachmentId
+          in: path
+          required: true
+          type: string
+        - name: vmId
+          in: path
+          required: true
+          type: string
+        - name: diskattachment
+          in: body
+          schema:
+            $ref: '#/definitions/DiskAttachment'
+      responses:
+        '200':
+          description: OK
+  /vms/{vmId}/diskattachments:
+    post:
+      tags:
+      - 'Vm'
+      description: |-
+        Adds a new disk attachment to the virtual machine. The `disk` parameter can contain just a reference, if the disk already exists:
+
+        [source,xml]
+        ----
+        ```
+        <disk_attachment>
+          <bootable>true</bootable>
+          <pass_discard>true</pass_discard>
+          <interface>ide</interface>
+          <active>true</active>
+          <disk id="123"/>
+        </disk_attachment>
+        ```
+        ----
+
+        Or it can contain the complete representation of the disk, if the disk doesn't exist yet:
+
+        [source,xml]
+        ----
+        ```
+        <disk_attachment>
+          <bootable>true</bootable>
+          <pass_discard>true</pass_discard>
+          <interface>ide</interface>
+          <active>true</active>
+          <disk>
+            <name>mydisk</name>
+            <provisioned_size>1024</provisioned_size>
+            ...
+          </disk>
+        </disk_attachment>
+        ```
+        ----
+
+        In this case the disk will be created and then attached to the virtual machine.
+
+        In both cases, use the following URL for a virtual machine with an id `345`:
+
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/vms/345/diskattachments
+        ```
+        ----
+
+        IMPORTANT: The server accepts requests that don't contain the `active` attribute, but the effect is undefined. In some cases the disk will be automatically activated and in other cases it won't. To avoid issues it is strongly recommended to always include the `active` attribute with the desired value.
+      parameters:
+        - name: vmId
+          in: path
+          required: true
+          type: string
+        - name: diskattachment
+          in: body
+          schema:
+            $ref: '#/definitions/DiskAttachment'
+      responses: 
+        200:
+          description: 'OK'
+    get:
+      tags: 
+      - 'Vm'
+      description: List the disk that are attached to the virtual machine.
+      parameters: 
+        - name: vmId
+          in: path
+          required: true
+          type: string
+      responses: 
+        200:
+          description: 'OK'
+  '/vms/{vmId}/export':
+    post:
+      tags:
+      - 'Vm'
+      description: |-
+        Exports a virtual machine to an export domain.
+
+        For example, to export virtual machine `123` to the export domain `myexport`:
+
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/vms/123/export
+        ```
+        ----
+
+        With a request body like this:
+
+        [source,xml]
+        ----
+        ```
+        <action>
+          <storage_domain>
+            <name>myexport</name>
+          </storage_domain>
+          <exclusive>true</exclusive>
+          <discard_snapshots>true</discard_snapshots>
+        </action>
+        ```
+        ----
+      parameters:
+        - name: vmId
+          in: path
+          description: ID of VM
+          required: true
+          type: string
+          format: uuid
+        - name: action
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              discard_snapshots:
+                description: |-
+                  Use the `discard_snapshots` parameter when the virtual machine should be exported with all of its
+                  snapshots collapsed.
+                type: boolean
+              exclusive:
+                description: |-
+                  Use the `exclusive` parameter when the virtual machine should be exported even if another copy of
+                  it already exists in the export domain (override).
+                type: boolean
+              storage_domain:
+                $ref: '#/definitions/StorageDomain'
+              async:
+                description: Indicates if the export should be performed asynchronously.
+                type: boolean
+      responses:
+        '202':
+          description: Accepted
+
+  /vms/{vmId}/migrate:
+    post:
+      tags: 
+      - 'Vm'
+      description: |-
+        Migrates a virtual machine to another physical host.
+
+        Example:
+
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/vms/123/migrate
+        ```
+        ----
+
+        To specify a specific host to migrate the virtual machine to:
+
+        [source,xml]
+        ----
+        ```
+        <action>
+          <host id="2ab5e1da-b726-4274-bbf7-0a42b16a0fc3"/>
+        </action>
+        ```
+        ----
+      parameters:
+        - name: vmId
+          in: path
+          required: true
+          type: string
+        - name: action
+          in: body
+          schema:
+            type: object
+            properties:
+              cluster:
+                description: |-
+                  Specifies the cluster the virtual machine should migrate to. This is an optional parameter. By default, the
+                  virtual machine is migrated to another host within the same cluster.
+                $ref: '#/definitions/Cluster'
+              force:
+                description: |-
+                  Specifies that the virtual machine should migrate even if the virtual machine is defined as non-migratable.
+                  This is an optional parameter. By default, it is set to `false`.
+                type: boolean
+              host:
+                description: |-
+                  Specifies a specific host that the virtual machine should migrate to. This is an optional parameter. By default,
+                  the {engine-name} automatically selects a default host for migration within the same cluster. If an API user
+                  requires a specific host, the user can specify the host with either an `id` or `name` parameter.
+                $ref: '#/definitions/Host'
+      responses: 
+        200:
+          description: 'OK'
+
+  '/vms/{vmId}/nics':
+    post:
+      tags:
+      - 'Vm'
+      description: |-
+        Adds a NIC to the virtual machine.
+
+        The following example adds a network interface named `mynic` using `virtio` and the `ovirtmgmt` network to the
+        virtual machine.
+
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/vms/123/nics
+        ```
+        ----
+
+        [source,xml]
+        ----
+        ```
+        <nic>
+          <interface>virtio</interface>
+          <name>mynic</name>
+          <network>
+            <name>ovirtmgmt</name>
+          </network>
+        </nic>
+        ```
+        ----
+
+        The following example sends that request using `curl`:
+
+        [source,bash]
+        ----
+        ```
+        curl \
+        --request POST \
+        --header "Version: 4" \
+        --header "Content-Type: application/xml" \
+        --header "Accept: application/xml" \
+        --user "admin@internal:mypassword" \
+        --cacert /etc/pki/ovirt-engine/ca.pem \
+        --data '
+        <nic>
+          <name>mynic</name>
+          <network>
+            <name>ovirtmgmt</name>
+          </network>
+        </nic>
+        ' \
+        https://myengine.example.com/ovirt-engine/api/vms/123/nics
+        ```
+        ----
+
+        [IMPORTANT]
+        ====
+        The hotplugging feature only supports virtual machine operating systems with hotplugging operations.
+        Example operating systems include:
+
+        - Red Hat Enterprise Linux 6
+        - Red Hat Enterprise Linux 5
+        - Windows Server 2008 and
+        - Windows Server 2003
+      parameters:
+        - name: vmId
+          in: path
+          description: ID of VM
+          required: true
+          type: string
+          format: uuid
+        - in: body
+          name: Nic
+          #escription:
+          required: true
+          schema:
+            $ref: '#/definitions/Nic'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/Nic'
+    get:
+      tags:
+      - 'Vm'
+      parameters:
+        - name: vmId
+          in: path
+          description: ID of VM
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Nic'
+
+  '/vms/{vmId}/nics/{nicId}':
+    get:
+      tags:
+      - 'Vm'
+      parameters:
+        - name: vmId
+          in: path
+          description: ID of VM
+          required: true
+          type: string
+          format: uuid
+        - name: nicId
+          in: path
+          description: ID of nic
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Nic'
+    delete:
+      tags:
+      - 'Vm'
+      description: |-
+        Removes the NIC.
+
+        For example, to remove the NIC with id `456` from the virtual machine with id `123` send a request like this:
+
+        [source]
+        ----
+        ```
+        DELETE /ovirt-engine/api/vms/123/nics/456
+        ```
+        ----
+
+        [IMPORTANT]
+        ====
+        The hotplugging feature only supports virtual machine operating systems with hotplugging operations.
+        Example operating systems include:
+
+        - Red Hat Enterprise Linux 6
+        - Red Hat Enterprise Linux 5
+        - Windows Server 2008 and
+        - Windows Server 2003
+      parameters:
+        - name: vmId
+          in: path
+          description: ID of VM
+          required: true
+          type: string
+          format: uuid
+        - name: nicId
+          in: path
+          description: ID of nic
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+    put:
+      tags:
+      - 'Vm'
+      description: |-
+        Updates the NIC.
+
+        For example, to update the NIC having with `456` belonging to virtual the machine with id `123` send a request
+        like this:
+
+        [source]
+        ----
+        ```
+        PUT /ovirt-engine/api/vms/123/nics/456
+        ```
+        ----
+
+        With a request body like this:
+
+        [source,xml]
+        ----
+        ```
+        <nic>
+          <name>mynic</name>
+          <interface>e1000</interface>
+          <vnic_profile id='789'/>
+        </nic>
+        ```
+        ----
+
+        [IMPORTANT]
+        ====
+        The hotplugging feature only supports virtual machine operating systems with hotplugging operations.
+        Example operating systems include:
+
+        - Red Hat Enterprise Linux 6
+        - Red Hat Enterprise Linux 5
+        - Windows Server 2008 and
+        - Windows Server 2003
+      parameters:
+        - name: vmId
+          in: path
+          description: ID of VM
+          required: true
+          type: string
+          format: uuid
+        - name: nicId
+          in: path
+          description: ID of nic
+          required: true
+          type: string
+          format: uuid
+        - in: body
+          name: Nic
+          #escription:
+          required: true
+          schema:
+            $ref: '#/definitions/Nic'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Nic'
+
+  '/vms/{vmId}/nics/{nicId}/activate':
+    post:
+      tags:
+      - 'Vm'
+      parameters:
+        - name: vmId
+          in: path
+          description: ID of VM
+          required: true
+          type: string
+          format: uuid
+        - name: nicId
+          in: path
+          description: ID of nic
+          required: true
+          type: string
+          format: uuid
+        - name: action
+          in: body
+          schema:
+            type: object
+            properties:
+              async:
+                description: Indicates if the activation should be performed asynchronously.
+                type: boolean
+      responses:
+        '200':
+          description: OK
+
+  '/vms/{vmId}/nics/{nicId}/deactivate':
+    post:
+      tags:
+      - 'Vm'
+      parameters:
+        - name: vmId
+          in: path
+          description: ID of VM
+          required: true
+          type: string
+          format: uuid
+        - name: nicId
+          in: path
+          description: ID of nic
+          required: true
+          type: string
+          format: uuid
+        - name: action
+          in: body
+          schema:
+            type: object
+            properties:
+              async:
+                description: Indicates if the deactivation should be performed asynchronously.
+                type: boolean
+      responses:
+        '200':
+          description: OK
+
+  /vms/{vmId}/nics/{nicId}/statistics:
+    get:
+      tags:
+      - 'Statistic'
+      description: |-
+        Retrieves a list of statistics.
+
+        For example, to retrieve the statistics for virtual machine `123` send a request like this:
+
+        [source]
+        ----
+        ```
+        GET /ovirt-engine/api/vms/123/statistics
+        ```
+        ----
+
+        The result will be like this:
+
+        [source,xml]
+        ----
+        ```
+        <statistics>
+          <statistic href="/ovirt-engine/api/vms/123/statistics/456" id="456">
+            <name>memory.installed</name>
+            <description>Total memory configured</description>
+            <kind>gauge</kind>
+            <type>integer</type>
+            <unit>bytes</unit>
+            <values>
+              <value>
+                <datum>1073741824</datum>
+              </value>
+            </values>
+            <vm href="/ovirt-engine/api/vms/123" id="123"/>
+          </statistic>
+          ...
+        </statistics>
+        ```
+        ----
+
+        Just a single part of the statistics can be retrieved by specifying its id at the end of the URI. That means:
+
+        [source]
+        ----
+        ```
+        GET /ovirt-engine/api/vms/123/statistics/456
+        ```
+        ----
+
+        Outputs:
+
+        [source,xml]
+        ----
+        ```
+        <statistic href="/ovirt-engine/api/vms/123/statistics/456" id="456">
+          <name>memory.installed</name>
+          <description>Total memory configured</description>
+          <kind>gauge</kind>
+          <type>integer</type>
+          <unit>bytes</unit>
+          <values>
+            <value>
+              <datum>1073741824</datum>
+            </value>
+          </values>
+          <vm href="/ovirt-engine/api/vms/123" id="123"/>
+        </statistic>
+        ```
+        ----
+      parameters:
+        - name: 'vmId'
+          in: 'path'
+          required: true
+          type : 'string'
+        - name: 'nicId'
+          in: 'path'
+          required: true
+          type : 'string'
+      responses: 
+        200:
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Statistic'
+  /vms/{vmId}/nics/{nicId}/statistics/{statisticId}:
+    get:
+      tags:
+      - 'Statistic'
+      parameters:
+        - name: 'vmId'
+          in: 'path'
+          required: true
+          type : 'string'
+        - name: 'nicId'
+          in: 'path'
+          required: true
+          type : 'string'
+        - name: 'statisticId'
+          in: 'path'
+          required: true
+          type : 'string'
+      responses: 
+        200:
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Statistic'
+  /vms/{vmId}/reboot:
+    post:
+      tags: 
+      - 'Vm'
+      description: |-
+        Sends a reboot request to a virtual machine.
+
+        For example:
+
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/vms/123/reboot
+        ```
+        ----
+
+        The reboot action does not take any action specific parameters; therefore, the request body should contain an empty `action`:
+
+        [source,xml]
+        ----
+        ```
+        <action/>
+        ```
+        ----
+      parameters:
+        - name: vmId
+          in: path
+          required: true
+          type: string
+        - name: action
+          in: body
+          schema:
+            type: object
+            properties:
+              async:
+                description: Indicates if the reboot should be performed asynchronously.
+                type: boolean
+      responses: 
+        200:
+          description: 'OK'
+
+  '/vms/{vmId}/snapshots':
+    post:
+      tags:
+      - 'Vm'
+      description: |-
+        Creates a virtual machine snapshot.
+
+        For example, to create a new snapshot for virtual machine `123` send a request like this:
+
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/vms/123/snapshots
+        ```
+        ----
+
+        With a request body like this:
+
+        [source,xml]
+        ----
+        ```
+        <snapshot>
+          <description>My snapshot</description>
+        </snapshot>
+        ```
+        ----
+
+        [IMPORTANT]
+        ====
+        When a snapshot is created the default value for the <<types/snapshot/attributes/persist_memorystate,
+        persist_memorystate>> attribute is `true`. That means that the content of the memory of the virtual
+        machine will be included in the snapshot, and it also means that the virtual machine will be paused
+        for a longer time. That can negatively affect applications that are very sensitive to timing (NTP
+        servers, for example). In those cases make sure that you set the attribute to `false`:
+
+        [source,xml]
+        ----
+        ```
+        <snapshot>
+          <description>My snapshot</description>
+          <persist_memorystate>false</persist_memorystate>
+        </snapshot>
+        ```
+        ----
+      parameters:
+        - name: vmId
+          in: path
+          description: ID of VM
+          required: true
+          type: string
+          format: uuid
+        - in: body
+          name: snapshot
+          #escription:
+          required: true
+          schema:
+            $ref: '#/definitions/Snapshot'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/Snapshot'
+    get:
+      tags:
+      - 'Vm'
+      parameters:
+        - name: vmId
+          in: path
+          description: ID of VM
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Snapshot'
+  '/vms/{vmId}/snapshots/{snapshotId}':
+    get:
+      tags:
+      - 'Vm'
+      parameters:
+        - name: vmId
+          in: path
+          description: ID of VM
+          required: true
+          type: string
+          format: uuid
+        - name: snapshotId
+          in: path
+          description: ID of snapshot
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Snapshot'
+    delete:
+      tags:
+      - 'Vm'
+      parameters:
+        - name: vmId
+          in: path
+          description: ID of VM
+          required: true
+          type: string
+          format: uuid
+        - name: snapshotId
+          in: path
+          description: ID of snapshot
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+
+  /vms/{vmId}/shutdown:
+    post:
+      tags: 
+      - 'Vm'
+      description: |-
+        This operation sends a shutdown request to a virtual machine.
+
+        For example:
+
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/vms/123/shutdown
+        ```
+        ----
+
+        The shutdown action does not take any action specific parameters; therefore, the request body should contain an empty `action`:
+
+        [source,xml]
+        ----
+        ```
+        <action/>
+        ```
+        ----
+      parameters:
+        - name: vmId
+          in: path
+          required: true
+          type: string
+        - name: action
+          in: body
+          schema:
+            type: object
+            properties:
+              async:
+                description: Indicates if the shutdown should be performed asynchronously.
+                type: boolean
+      responses: 
+        200:  
+          description: 'OK'
+  
+  /vms/{vmId}/start:
+    post:
+      tags: 
+      - 'Vm'
+      description: |-
+        Starts the virtual machine.
+
+        If the virtual environment is complete and the virtual machine contains all necessary components to function, it can be started.
+
+        This example starts the virtual machine:
+
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/vms/123/start
+        ```
+        ----
+
+        With a request body:
+
+        [source,xml]
+        ----
+        ```
+        <action/>
+        ```
+        ----
+      parameters:
+        - name: vmId
+          in: path
+          required: true
+          type: string
+        - name: action
+          in: body
+          schema:
+            type: object
+            properties:
+              vm:
+                description: |-
+                  The definition of the virtual machine for this specific run.
+
+                  For example:
+
+                  [source,xml]
+                  ----
+                  <action>
+                    <vm>
+                      <os>
+                        <boot>
+                          <devices>
+                            <device>cdrom</device>
+                          </devices>
+                        </boot>
+                      </os>
+                    </vm>
+                  </action>
+                  ----
+
+                  This will set the boot device to the CDROM only for this specific start. After the virtual machine is powered off, this definition will be reverted.
+                $ref: '#/definitions/Vm'
+              async:
+                description: Indicates if the start action should be performed asynchronously.
+                type: boolean
+              filter:
+                description: Indicates if the results should be filtered according to the permissions of the user.
+                type: boolean
+      responses: 
+        200:
+          description: 'OK'
+  /vms/{vmId}/statistics:
+    get:
+      tags:
+      - 'Statistic'
+      description: |-
+        Retrieves a list of statistics.
+
+        For example, to retrieve the statistics for virtual machine `123` send a request like this:
+
+        [source]
+        ----
+        ```
+        GET /ovirt-engine/api/vms/123/statistics
+        ```
+        ----
+
+        The result will be like this:
+
+        [source,xml]
+        ----
+        ```
+        <statistics>
+          <statistic href="/ovirt-engine/api/vms/123/statistics/456" id="456">
+            <name>memory.installed</name>
+            <description>Total memory configured</description>
+            <kind>gauge</kind>
+            <type>integer</type>
+            <unit>bytes</unit>
+            <values>
+              <value>
+                <datum>1073741824</datum>
+              </value>
+            </values>
+            <vm href="/ovirt-engine/api/vms/123" id="123"/>
+          </statistic>
+          ...
+        </statistics>
+        ```
+        ----
+
+        Just a single part of the statistics can be retrieved by specifying its id at the end of the URI. That means:
+
+        [source]
+        ----
+        ```
+        GET /ovirt-engine/api/vms/123/statistics/456
+        ```
+        ----
+
+        Outputs:
+
+        [source,xml]
+        ----
+        ```
+        <statistic href="/ovirt-engine/api/vms/123/statistics/456" id="456">
+          <name>memory.installed</name>
+          <description>Total memory configured</description>
+          <kind>gauge</kind>
+          <type>integer</type>
+          <unit>bytes</unit>
+          <values>
+            <value>
+              <datum>1073741824</datum>
+            </value>
+          </values>
+          <vm href="/ovirt-engine/api/vms/123" id="123"/>
+        </statistic>
+        ```
+        ----
+      parameters:
+        - name: 'vmId'
+          in: 'path'
+          required: true
+          type : 'string'
+      responses:
+        200:
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Statistic'
+  /vms/{vmId}/statistics/{statisticId}:
+    get:
+      tags:
+      - 'Statistic'
+      parameters:
+        - name: 'vmId'
+          in: 'path'
+          required: true
+          type : 'string'
+        - name: 'statisticId'
+          in: 'path'
+          required: true
+          type : 'string'
+      responses:
+        200:
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Statistic'
+  /vms/{vmId}/stop:
+    post:
+      tags:
+      - 'Vm'
+      description: |-
+        This operation forces a virtual machine to power-off.
+
+        For example:
+
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/vms/123/stop
+        ```
+        ----
+
+        The stop action does not take any action specific parameters;
+        therefore, the request body should contain an empty `action`:
+
+        [source,xml]
+        ----
+        ```
+        <action/>
+        ```
+        ----
+      parameters:
+        - name: vmId
+          in: path
+          required: true
+          type: string
+        - name: action
+          in: body
+          schema:
+            type: object
+            properties:
+              async:
+                description: Indicates if the stop action should be performed asynchronously.
+                type: boolean
+      responses: 
+        200: 
+          description: 'OK'
+  '/vms/{vmId}/suspend':
+    post:
+      tags: 
+      - "Vm"
+      description: |-
+        This operation saves the virtual machine state to disk and stops it.
+        Start a suspended virtual machine and restore the virtual machine state with the start action.
+
+        For example:
+
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/vms/123/suspend
+        ```
+        ----
+
+        The suspend action does not take any action specific parameters; therefore, the request body should contain an empty `action`:
+
+        [source,xml]
+        ----
+        ```
+        <action/>
+        ```
+        ----
+      parameters:
+        - name: vmId
+          in: path
+          required: true
+          type: string
+        - name: action
+          in: body
+          schema:
+            type: object
+            properties:
+              async:
+                description: Indicates if the suspend action should be performed asynchronously.
+                type: boolean
+      responses: 
+        200:
+          description: 'OK'
+    
+  /vms/{vmId}/tags:
+    post:
+      tags:
+      - 'Tag'
+      description: |-
+        Assign tag to specific entity in the system.
+
+        For example to assign tag `mytag` to virtual machine with the id `123` send a request like this:
+
+        ----
+        ```
+        POST /ovirt-engine/api/vms/123/tags
+        ```
+        ----
+
+        With a request body like this:
+
+        [source,xml]
+        ----
+        ```
+        <tag>
+          <name>mytag</name>
+        </tag>
+        ```
+        ----
+      parameters: 
+        - name: 'vmId'
+          in: 'path'
+          type: string
+          required: true
+        - name: 'tag'
+          in: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/Tag'
+      responses:
+        200:
+          description: 'OK'
+    get:
+      tags:
+      - 'Tag'
+      description: |-
+        List all tags assigned to the specific entity.
+
+        For example to list all the tags of the virtual machine with id `123` send a request like this:
+
+        ----
+        ```
+        GET /ovirt-engine/api/vms/123/tags
+        ```
+        ----
+
+        [source,xml]
+        ----
+        ```
+        <tags>
+          <tag href="/ovirt-engine/api/tags/222" id="222">
+            <name>mytag</name>
+            <description>mytag</description>
+            <vm href="/ovirt-engine/api/vms/123" id="123"/>
+          </tag>
+        </tags>
+        ```
+        ----
+      parameters: 
+        - name: 'vmId'
+          in: 'path'
+          type: string
+          required: true
+      responses: 
+        200:
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Tag'
+  /vms/{vmId}/tags/{tagId}:
+    get:
+      tags:
+      - 'Tag'
+      description: |-
+        Gets the information about the assigned tag.
+
+        For example to retrieve the information about the tag with the id `456` which is assigned to virtual machine
+        with id `123` send a request like this:
+
+        ----
+        ```
+        GET /ovirt-engine/api/vms/123/tags/456
+        ```
+        ----
+
+        [source,xml]
+        ----
+        ```
+        <tag href="/ovirt-engine/api/tags/456" id="456">
+          <name>root</name>
+          <description>root</description>
+          <vm href="/ovirt-engine/api/vms/123" id="123"/>
+        </tag>
+        ```
+        ----
+      parameters: 
+        - name: 'vmId'
+          in: 'path'
+          type: string
+          required: true
+        - name: 'tagId'
+          in: 'path'
+          type: string
+          required: true
+      responses: 
+        200:
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Tag'
+    delete:
+      tags:
+      - 'Tag'
+      description: |-
+        Unassign tag from specific entity in the system.
+
+        For example to unassign the tag with id `456` from virtual machine with id `123` send a request like this:
+
+        ....
+        DELETE /ovirt-engine/api/vms/123/tags/456
+        ....
+      parameters: 
+        - name: 'vmId'
+          in: 'path'
+          type: string
+          required: true
+        - name: 'tagId'
+          in: 'path'
+          type: string
+          required: true
+      responses: 
+        200:
+          description: 'OK'
+
+  /vnicprofiles:
+    post:
+      description: |-
+        Add a vNIC profile.
+
+        For example to add vNIC profile `123` to network `456` send a request to:
+
+        [source]
+        ----
+        ```
+        POST /ovirt-engine/api/networks/456/vnicprofiles
+        ```
+        ----
+
+        With the following body:
+
+        [source,xml]
+        ----
+        ```
+        <vnic_profile id="123">
+          <name>new_vNIC_name</name>
+          <pass_through>
+            <mode>disabled</mode>
+          </pass_through>
+          <port_mirroring>false</port_mirroring>
+        </vnic_profile>
+        ```
+        ----
+
+        Please note that there is a default network filter to each VNIC profile.
+        For more details of how the default network filter is calculated please refer to
+        the documentation in <<services/network_filters,NetworkFilters>>.
+
+        The output of creating a new VNIC profile depends in the  body  arguments that were given.
+        In case no network filter was given, the default network filter will be configured. For example:
+
+        [source,xml]
+        ----
+        ```
+        <vnic_profile href="/ovirt-engine/api/vnicprofiles/123" id="123">
+          <name>new_vNIC_name</name>
+          <link href="/ovirt-engine/api/vnicprofiles/123/permissions" rel="permissions"/>
+          <pass_through>
+            <mode>disabled</mode>
+          </pass_through>
+          <port_mirroring>false</port_mirroring>
+          <network href="/ovirt-engine/api/networks/456" id="456"/>
+          <network_filter href="/ovirt-engine/api/networkfilters/789" id="789"/>
+        </vnic_profile>
+        ```
+        ----
+
+        In case an empty network filter was given, no network filter will be configured for the specific VNIC profile
+        regardless of the VNIC profile's default network filter. For example:
+
+        [source,xml]
+        ----
+        ```
+        <vnic_profile>
+          <name>no_network_filter</name>
+          <network_filter/>
+        </vnic_profile>
+        ```
+        ----
+
+        In case that a specific valid network filter id was given, the VNIC profile will be configured with the given
+        network filter regardless of the VNIC profiles's default network filter. For example:
+
+        [source,xml]
+        ----
+        ```
+        <vnic_profile>
+          <name>user_choice_network_filter</name>
+          <network_filter id= "0000001b-001b-001b-001b-0000000001d5"/>
+        </vnic_profile>
+        ```
+        ----
+      parameters:
+        - in: body
+          name: VnicProfile
+          #escription:
+          required: true
+          schema:
+            $ref: '#/definitions/VnicProfile'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/VnicProfile'
+    get:
+      description: List all vNIC profiles.
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/VnicProfile'
+
+  '/vnicprofiles/{profileId}':
+    get:
+      description: Retrieves details about a vNIC profile.
+      parameters:
+        - name: profileId
+          in: path
+          description: ID of vNIC profile
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/VnicProfile'
+    delete:
+      description: Removes the vNIC profile.
+      parameters:
+        - name: profileId
+          in: path
+          description: ID of vNIC profile
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+    put:
+      description: Updates details of a vNIC profile.
+      parameters:
+        - name: profileId
+          in: path
+          description: ID of vNIC profile
+          required: true
+          type: string
+          format: uuid
+        - in: body
+          name: VnicProfile
+          #escription:
+          required: true
+          schema:
+            $ref: '#/definitions/VnicProfile'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/VnicProfile'
+
+securityDefinitions:
+  basicAuth:     # <-- arbitrary name for the security scheme
+    type: basic
+
+definitions:
+  AffinityGroup:
+    description: An affinity group represents a group of virtual machines with a defined relationship.
+    type: object
+    properties:
+      id:
+        description: A unique identifier.
+        type: string
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      enforcing:
+        description: |-
+          Specifies whether the affinity group uses hard or soft enforcement of the affinity applied to virtual machines
+          that are members of that affinity group.
+        type: boolean
+      positive:
+        description: |-
+          Specifies whether the affinity group applies positive affinity or negative affinity to virtual machines that are
+          members of that affinity group.
+        type: boolean
+      cluster:
+        $ref: '#/definitions/Cluster'
+
+  Balance:
+    description: |-
+      A link to the balancer that used in scheduling policy.
+    type: object
+    properties:
+      comment:
+        description: Free text containing comments about this object.
+        type: string
+      description:
+        type: string
+      id:
+        description: A unique identifier.
+        type: string
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      scheduling_policy:
+        $ref: '#/definitions/SchedulingPolicy'
+      scheduling_policy_unit:
+        $ref: '#/definitions/SchedulingPolicyUnit'
+
+  Cluster:
+    type: object
+    properties:
+      custom_scheduling_policy_properties:
+        description: Custom scheduling policy properties for the scheduling policy of the cluster.
+        type: array
+        items:
+          $ref: '#/definitions/Property'
+      id:
+        description: A unique identifier.
+        type: string
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      scheduling_policy:
+        $ref: '#/definitions/SchedulingPolicy'
+
+  Cpu:
+    type: object
+    properties:
+      architecture:
+        type: string
+        enum:
+          - ppc64
+          - undefined
+          - x86_64
+      mode:
+        type: string
+        enum:
+          - custom
+          - host_model
+          - host_passthrough
+      topology:
+        $ref: '#/definitions/CpuTopology'
+
+  CpuTopology:
+    type: object
+    properties:
+      cores:
+        type: integer
+        format: int32
+      sockets:
+        type: integer
+        format: int32
+      threads:
+        type: integer
+        format: int32
+
+  DataCenter:
+    type: object
+    properties:
+      comment:
+        description: Free text containing comments about this object.
+        type: string
+      description:
+        description: A human-readable description in plain text.
+        type: string
+      id:
+        description: A unique identifier.
+        type: string
+      local:
+        type: boolean
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      quota_mode:
+        type: string
+        enum:
+          - audit
+          - disabled
+          - enabled
+      status:
+        type: string
+        enum:
+          - contend
+          - maintenance
+          - not_operational
+          - problematic
+          - uninitialized
+          - up
+      storage_format:
+        type: string
+        enum:
+          - v1
+          - v2
+          - v3
+          - v4
+      storage_domains:
+        description: Reference to storage domains attached to this data center.
+        type: array
+        items:
+          $ref: '#/definitions/StorageDomain'
+      clusters:
+        description: Reference to clusters inside this data center.
+        type: array
+        items:
+          $ref: '#/definitions/Cluster'
+      networks:
+        description: Reference to networks attached to this data center.
+        type: array
+        items:
+          $ref: '#/definitions/Network'
+      quotas:
+        description: Reference to quotas assigned to this data center.
+        type: array
+        items:
+          $ref: '#/definitions/Quota'
+      qoss:
+        description: Reference to quality of service used by this data center.
+        type: array
+        items:
+          $ref: '#/definitions/Qos'
+
+  Disk:
+    description: Represents a virtual disk device.
+    type: object
+    properties:
+      alias:
+        type: string
+      format:
+        description: The underlying storage format.
+        type: string
+        enum:
+          - cow
+          - raw
+      id:
+        description: A unique identifier.
+        type: string
+      interface:
+        description: |-
+          The type of interface driver used to connect the disk device to the virtual machine.
+
+          IMPORTANT: This attribute only makes sense for disks that are actually connected to virtual machines, and in version 4 of the API it has been moved to the <<types/disk_attachment, DiskAttachment>> type. It is preserved here only for backwards compatibility, and it will be removed in the future.
+        type: string
+        enum:
+          - ide
+          - spapr_vscsi
+          - virtio
+          - virtio_scsi
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      provisioned_size:
+        description: |-
+          The virtual size of the disk, in bytes.
+
+          This attribute is mandatory when creating a new disk.
+        type: integer
+        format: int32
+      shareable:
+        description: |-
+          Indicates if the disk can be attached to multiple virtual machines.
+
+          IMPORTANT: When a disk is attached to multiple virtual machines it is the responsibility of the guest
+          operating systems of those virtual machines to coordinate access to it, to avoid corruption of the data, for
+          example using a shared file system like https://www.gluster.org[GlusterFS] or
+          http://www.sourceware.org/cluster/gfs[GFS].
+        type: boolean
+      status:
+        description: The status of the disk device.
+        type: string
+        enum:
+          - illegal
+          - locked
+          - ok
+      storage_type:
+        type: string
+        enum:
+          - cinder
+          - image
+          - lun
+      vms:
+        description: |-
+          References to the virtual machines that are using this device. A device may be used by several virtual machines; for example, a shared disk my be used simultaneously by two or more virtual machines.
+        type: array
+        items:
+          $ref: '#/definitions/Vm'
+      storage_domain:
+        $ref: '#/definitions/StorageDomain'
+      storage_domains:
+        description: |-
+          The storage domains associated with this disk.
+
+          NOTE: Only required when the first disk is being added to a virtual machine that was not itself created from a
+          template.
+        type: array
+        items:
+          $ref: '#/definitions/StorageDomain'
+
+  DiskAttachment:
+    description: Describes how a disk is attached to a virtual machine.
+    type: object
+    properties:
+      active:
+        description: |-
+          Defines whether the disk is active in the virtual machine it's attached to.
+
+          A disk attached to a virtual machine in an active status is connected to the virtual machine at run time and
+          can be used.
+        type: boolean
+      bootable:
+        description: Defines whether the disk is bootable.
+        type: boolean
+      id:
+        description: A unique identifier.
+        type: string
+      interface:
+        description: The type of interface driver used to connect the disk device to the virtual machine.
+        type: string
+        enum:
+          - ide
+          - spapr_vscsi
+          - virtio
+          - virtio_scsi
+      disk:
+        $ref: '#/definitions/Disk'
+      vm:
+        $ref: '#/definitions/Vm'
+
+  DiskProfile:
+    description: Describes diskprofile
+    type: object
+    properties:
+      id:
+        description: A unique identifier.
+        type: string
+      name:
+        description: The name of the diskprofile.
+        type: string
+      qos:
+        $ref: '#/definitions/Qos'
+      storagedomain:
+        $ref: '#/definitions/StorageDomain'
+
+  ExternalVmImport:
+    description: Describes the parameters for the virtual machine import operation from an external system.
+    type: object
+    properties:
+      name:
+        description: 'The name of the virtual machine to be imported, as is defined within the external system.'
+        type: string
+      password:
+        description: The password to authenticate against the external hypervisor system.
+        type: string
+      provider:
+        description: The type of external virtual machine provider.
+        type: string
+        enum:
+          - kvm
+          - vmware
+          - xen
+      sparse:
+        description: 'Specifies the disk allocation policy of the resulting virtual machine: `true` for sparse, `false` for preallocated.'
+        type: boolean
+      url:
+        description: |-
+          The URL to be passed to the `virt-v2v` tool for conversion.
+
+          Example:
+
+          [source]
+          ----
+          vpx://wmware_user@vcenter-host/DataCenter/Cluster/esxi-host?no_verify=1
+          ----
+
+          More examples can be found at http://libguestfs.org/virt-v2v.1.html.
+        type: string
+      username:
+        description: The username to authenticate against the external hypervisor system.
+        type: string
+      vm:
+        description: |-
+          The virtual machine entity used to specify a name for the newly created virtual machine.
+
+          If a name is not specified, the source virtual machine name will be used.
+        $ref: '#/definitions/Vm'
+      cluster:
+        description: Specifies the target cluster for the resulting virtual machine.
+        $ref: '#/definitions/Cluster'
+      storage_domain:
+        description: Specifies the target storage domain for converted disks.
+        $ref: '#/definitions/StorageDomain'
+      quota:
+        description: Optional. Specifies the quota that will be applied to the resulting virtual machine.
+        $ref: '#/definitions/Quota'
+      host:
+        description: |-
+          Optional. Specifies the host (using host's ID) to be used for the conversion process.
+          If not specified, one is selected automatically.
+        $ref: '#/definitions/Host'
+
+  Filter:
+    description: |-
+      A filter set that used in scheduling policy.
+    type: object
+    properties:
+      comment:
+        description: Free text containing comments about this object.
+        type: string
+      description:
+        type: string
+      id:
+        description: A unique identifier.
+        type: string
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      position:
+        type: integer
+      scheduling_policy_unit:
+        $ref: '#/definitions/SchedulingPolicyUnit'
+
+  HighAvailability:
+    description: Type representing high availability of a virtual machine.
+    type: object
+    properties:
+      enabled:
+        description: Define if the virtual machine should be consider highly available.
+        type: boolean
+      priority:
+        description: |-
+          Indicates the priority of the virtual machine inside the run and migration queues.
+
+          Virtual machines with higher priorities will be started and migrated before virtual machines with lower
+          priorities.
+
+          The value is an integer between 0 and 100. The higher the value, the higher the priority.
+
+          The graphical user interface (GUI) does not allow specifying all the possible values, instead
+          it only allows you to select _Low_, _Medium_ or _High_. When the value is set using the API, the GUI
+          will set the label as follows:
+
+          |===
+          |API Value |GUI Label
+
+          |0 - 25 |Low
+          |26 - 74 |Medium
+          |75 - 100 |High
+
+          |===
+
+          When the label is selected using the GUI, the value in the API will be set as follows:
+
+          |===
+          |GUI Label |API Value
+
+          |Low |1
+          |Medium |50
+          |High |100
+
+          |===
+        type: integer
+        format: int32
+
+  Host:
+    description: Type representing a host.
+    type: object
+    properties:
+      address:
+        description: The host address (FQDN/IP).
+        type: string
+      id:
+        description: A unique identifier.
+        type: string
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      status:
+        description: The host status.
+        type: string
+        enum:
+          - connecting
+          - down
+          - error
+          - initializing
+          - install_failed
+          - installing
+          - installing_os
+          - kdumping
+          - maintenance
+          - non_operational
+          - non_responsive
+          - pending_approval
+          - preparing_for_maintenance
+          - reboot
+          - unassigned
+          - up
+
+  Mac:
+    type: object
+    properties:
+      address:
+        type: string
+
+  Network:
+    description: |-
+      The type for a logical network.
+
+      An example of the JSON representation of a logical network:
+
+      [source,json]
+      ----
+      ```
+      {
+        "network" : [ {
+          "data_center" : {
+            "href" : "/ovirt-engine/api/datacenters/123",
+            "id" : "123"
+          },
+          "stp" : "false",
+          "mtu" : "0",
+          "usages" : {
+            "usage" : [ "vm" ]
+          },
+          "name" : "ovirtmgmt",
+          "description" : "Management Network",
+          "href" : "/ovirt-engine/api/networks/456",
+          "id" : "456",
+          "link" : [ {
+            "href" : "/ovirt-engine/api/networks/456/permissions",
+            "rel" : "permissions"
+          }, {
+            "href" : "/ovirt-engine/api/networks/456/vnicprofiles",
+            "rel" : "vnicprofiles"
+          }, {
+            "href" : "/ovirt-engine/api/networks/456/labels",
+            "rel" : "labels"
+          } ]
+        } ]
+      }
+      ```
+      ----
+
+      An example of the XML representation of the same logical network:
+
+      [source,xml]
+      ----
+      ```
+      <network href="/ovirt-engine/api/networks/456" id="456">
+        <name>ovirtmgmt</name>
+        <description>Management Network</description>
+        <link href="/ovirt-engine/api/networks/456/permissions" rel="permissions"/>
+        <link href="/ovirt-engine/api/networks/456/vnicprofiles" rel="vnicprofiles"/>
+        <link href="/ovirt-engine/api/networks/456/labels" rel="labels"/>
+        <data_center href="/ovirt-engine/api/datacenters/123" id="123"/>
+        <stp>false</stp>
+        <mtu>0</mtu>
+        <usages>
+          <usage>vm</usage>
+        </usages>
+      </network>
+      ```
+      ----
+    type: object
+    properties:
+      comment:
+        description: Free text containing comments about this object.
+        type: string
+      description:
+        description: A human-readable description in plain text.
+        type: string
+      display:
+        description: 'Deprecated, ''usages'' should be used to define network as a display network.'
+        type: boolean
+      id:
+        description: A unique identifier.
+        type: string
+      mtu:
+        description: Specifies the maximum transmission unit for the network.
+        type: integer
+        format: int32
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      profile_required:
+        description: |-
+          Specifies whether upon creation of the network a virtual network interface profile should automatically be
+          created.
+        type: boolean
+      required:
+        description: |-
+          Defines whether the network is mandatory for all the hosts in the cluster. In case a 'required'
+          `operational` network is omitted from a host, the host will be marked as `non_operational`,
+        type: boolean
+      status:
+        description: |-
+          The status of the network. `non_operational` if the network defined as 'required' and
+          omitted from any active cluster host. `operational` otherwise.
+        type: string
+        enum:
+          - non_operational
+          - operational
+      stp:
+        description: Specifies whether the spanning tree protocol is enabled for the network.
+        type: boolean
+      usages:
+        description: |-
+          Defines a set of usage elements for the network.
+
+          For example, users can specify that the network is to be used for virtual machine traffic and also for
+          display traffic with the `vm` and `display` values.
+        type: array
+        items:
+          type: string
+          enum:
+            - default_route
+            - display
+            - gluster
+            - management
+            - migration
+            - vm
+
+      data_center:
+        description: A reference to the data center that the network is a member of.
+        $ref: '#/definitions/DataCenter'
+      cluster:
+        description: |-
+          A reference to the cluster this network is attached to. Will be filled only if the network is accessed from the
+          cluster level.
+        $ref: '#/definitions/Cluster'
+      qos:
+        description: Reference to quality of service.
+        $ref: '#/definitions/Qos'
+      vnic_profiles:
+        description: A reference to the profiles of the network.
+        type: array
+        items:
+          $ref: '#/definitions/VnicProfile'
+
+  Nic:
+    description: |-
+      Represents a virtual machine NIC.
+
+      For example, the XML representation of a NIC will look like this:
+
+      [source,xml]
+      ----
+      <nic href="/ovirt-engine/api/vms/123/nics/456" id="456">
+        <name>nic1</name>
+        <vm href="/ovirt-engine/api/vms/123" id="123"/>
+        <interface>virtio</interface>
+        <linked>true</linked>
+        <mac>
+          <address>02:00:00:00:00:00</address>
+        </mac>
+        <plugged>true</plugged>
+        <vnic_profile href="/ovirt-engine/api/vnicprofiles/789" id="789"/>
+      </nic>
+      ----
+    type: object
+    properties:
+      boot_protocol:
+        description: Defines how an IP address is assigned to the NIC.
+        type: string
+        enum:
+          - autoconf
+          - dhcp
+          - none
+          - static
+      comment:
+        description: Free text containing comments about this object.
+        type: string
+      description:
+        description: A human-readable description in plain text.
+        type: string
+      id:
+        description: A unique identifier.
+        type: string
+      interface:
+        description: The type of driver used for the NIC.
+        type: string
+        enum:
+          - e1000
+          - pci_passthrough
+          - rtl8139
+          - rtl8139_virtio
+          - spapr_vlan
+          - virtio
+      linked:
+        description: Defines if the NIC is linked to the virtual machine.
+        type: boolean
+      mac:
+        description: The MAC address of the interface.
+        $ref: '#/definitions/Mac'
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      on_boot:
+        description: Defines if the network interface should be activated upon operation system startup.
+        type: boolean
+      plugged:
+        description: Defines if the NIC is plugged in to the virtual machine.
+        type: boolean
+      vms:
+        description: |-
+          References to the virtual machines that are using this device. A device may be used by several virtual machines;
+          for example, a shared disk my be used simultaneously by two or more virtual machines.
+        type: array
+        items:
+          $ref: '#/definitions/Vm'
+      vm:
+        description: 'Don''t use this element, use `vms` instead.'
+        $ref: '#/definitions/Vm'
+      network:
+        description: |-
+          A reference to the network that the interface should be connected to. A blank network ID is allowed.
+
+          Usage of this element for creating or updating a NIC is deprecated; use `vnic_profile` instead. It is preserved
+          because it is still in use by the `initialization` element, as a holder for IP addresses and other network
+          details.
+        $ref: '#/definitions/Network'
+      statistics:
+        description: A link to the statistics for the NIC.
+        type: array
+        items:
+          $ref: '#/definitions/Statistic'
+      vnic_profile:
+        description: A link to an associated virtual network interface profile.
+        $ref: '#/definitions/VnicProfile'
+      virtual_function_allowed_networks:
+        description: |-
+          A link to a collection of networks that are allowed to be attached to the virtual functions
+          of an SR-IOV NIC.
+        type: array
+        items:
+          $ref: '#/definitions/Network'
+
+  PolicyUnitType:
+    type: string
+    enum:
+      - filter
+      - load_balancing
+      - weight
+
+  Property:
+    description: |-
+    type: object
+    properties:
+      name:
+        type: string
+      value:
+        type: string
+
+  Qos:
+    description: |-
+      This type represents the attributes to define Quality of service (QoS).
+
+      For storage the `type` is <<types/qos_type, storage>>, the attributes `max_throughput`, `max_read_throughput`,
+      `max_write_throughput`, `max_iops`, `max_read_iops` and `max_write_iops` are relevant.
+
+      For resources with computing capabilities the `type` is <<types/qos_type, cpu>>, the attribute `cpu_limit` is
+      relevant.
+
+      For virtual machines networks the `type` is <<types/qos_type, network>>, the attributes `inbound_average`,
+      `inbound_peak`, `inbound_burst`, `outbound_average`, `outbound_peak` and `outbound_burst` are relevant.
+
+      For host networks the `type` is <<types/qos_type, hostnetwork>>, the attributes `outbound_average_linkshare`,
+      `outbound_average_upperlimit` and `outbound_average_realtime` are relevant.
+    type: object
+    properties:
+      comment:
+        description: Free text containing comments about this object.
+        type: string
+      cpu_limit:
+        description: |-
+          The maximum processing capability in %.
+
+          Used to configure computing resources.
+        type: integer
+        format: int32
+      description:
+        description: A human-readable description in plain text.
+        type: string
+      id:
+        description: A unique identifier.
+        type: string
+      inbound_average:
+        description: |-
+          The desired average inbound bit rate in Mbps.
+
+          Used to configure virtual machines networks. If defined, `inbound_peak` and `inbound_burst` also has to be set.
+
+          See https://libvirt.org/formatnetwork.html#elementQoS[Libvirt-QOS] for further details.
+        type: integer
+        format: int32
+      inbound_burst:
+        description: |-
+          The amount of data that can be delivered in a single burst in MiB.
+
+          Used to configure virtual machines networks. If defined, `inbound_average` and `inbound_peak` also has to be set.
+
+          See https://libvirt.org/formatnetwork.html#elementQoS[Libvirt-QOS] for further details.
+        type: integer
+        format: int32
+      inbound_peak:
+        description: |-
+          The maximum inbound rate in Mbps.
+
+          Used to configure virtual machines networks. If defined, `inbound_average` and `inbound_burst` also has to be set.
+
+          See https://libvirt.org/formatnetwork.html#elementQoS[Libvirt-QOS] for further details.
+        type: integer
+        format: int32
+      max_iops:
+        description: |-
+          Maximum permitted number of input and output operations per second.
+
+          Used to configure storage. Must not be set if `max_read_iops` or `max_write_iops` is set.
+        type: integer
+        format: int32
+      max_read_iops:
+        description: |-
+          Maximum permitted number of input operations per second.
+
+          Used to configure storage. Must not be set if `max_iops` is set.
+        type: integer
+        format: int32
+      max_read_throughput:
+        description: |-
+          Maximum permitted throughput for read operations.
+
+          Used to configure storage. Must not be set if `max_throughput` is set.
+        type: integer
+        format: int32
+      max_throughput:
+        description: |-
+          Maximum permitted total throughput.
+
+          Used to configure storage. Must not be set if `max_read_throughput` or `max_write_throughput` is set.
+        type: integer
+        format: int32
+      max_write_iops:
+        description: |-
+          Maximum permitted number of output operations per second.
+
+          Used to configure storage. Must not be set if `max_iops` is set.
+        type: integer
+        format: int32
+      max_write_throughput:
+        description: |-
+          Maximum permitted throughput for write operations.
+
+          Used to configure storage. Must not be set if `max_throughput` is set.
+        type: integer
+        format: int32
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      outbound_average:
+        description: |-
+          The desired average outbound bit rate in Mbps.
+
+          Used to configure virtual machines networks. If defined, `outbound_peak` and `outbound_burst` also has to be set.
+
+          See https://libvirt.org/formatnetwork.html#elementQoS[Libvirt-QOS] for further details.
+        type: integer
+        format: int32
+      outbound_average_linkshare:
+        description: |-
+          Weighted share.
+
+          Used to configure host networks. Signifies how much of the logical link's capacity a specific network should be
+          allocated, relative to the other networks attached to the same logical link. The exact share depends on the sum
+          of shares of all networks on that link. By default this is a number in the range 1-100.
+        type: integer
+        format: int32
+      outbound_average_realtime:
+        description: |-
+          The committed rate in Mbps.
+
+          Used to configure host networks. The minimum bandwidth required by a network. The committed rate requested is not
+          guaranteed and will vary depending on the network infrastructure and the committed rate requested by other
+          networks on the same logical link.
+        type: integer
+        format: int32
+      outbound_average_upperlimit:
+        description: |-
+          The maximum bandwidth to be used by a network in Mbps.
+
+          Used to configure host networks. If `outboundAverageUpperlimit` and `outbound_average_realtime` are provided, the
+          `outbound_averageUpperlimit` must not be lower than the `outbound_average_realtime`.
+
+          See https://libvirt.org/formatnetwork.html#elementQoS[Libvirt-QOS] for further details.
+        type: integer
+        format: int32
+      outbound_burst:
+        description: |-
+          The amount of data that can be sent in a single burst in MiB.
+
+          Used to configure virtual machines networks. If defined, `outbound_average` and `outbound_peak` also has to be
+          set.
+
+          See https://libvirt.org/formatnetwork.html#elementQoS[Libvirt-QOS] for further details.
+        type: integer
+        format: int32
+      outbound_peak:
+        description: |-
+          The maximum outbound rate in Mbps.
+
+          Used to configure virtual machines networks. If defined, `outbound_average` and `outbound_burst` also has to be
+          set.
+
+          See https://libvirt.org/formatnetwork.html#elementQoS[Libvirt-QOS] for further details.
+        type: integer
+        format: int32
+      type:
+        description: The kind of resources this entry can be assigned.
+        type: string
+        enum:
+          - cpu
+          - hostnetwork
+          - network
+          - storage
+      data_center:
+        description: The data center the QoS is assiciated to.
+        $ref: '#/definitions/DataCenter'
+
+  Quota:
+    description: |-
+      Represents a quota object.
+
+      An example XML representation of a quota:
+
+      [source,xml]
+      ----
+      ```
+      <quota href="/ovirt-engine/api/datacenters/7044934e/quotas/dcad5ddc" id="dcad5ddc">
+        <name>My Quota</name>
+        <description>A quota for my oVirt environment</description>
+        <cluster_hard_limit_pct>0</cluster_hard_limit_pct>
+        <cluster_soft_limit_pct>0</cluster_soft_limit_pct>
+        <data_center href="/ovirt-engine/api/datacenters/7044934e" id="7044934e"/>
+        <storage_hard_limit_pct>0</storage_hard_limit_pct>
+        <storage_soft_limit_pct>0</storage_soft_limit_pct>
+      </quota>
+      ```
+      ----
+    type: object
+    properties:
+      cluster_hard_limit_pct:
+        type: integer
+        format: int32
+      cluster_soft_limit_pct:
+        type: integer
+        format: int32
+      comment:
+        description: Free text containing comments about this object.
+        type: string
+      data_center:
+        $ref: '#/definitions/DataCenter'
+      description:
+        description: A human-readable description in plain text.
+        type: string
+      disks:
+        type: array
+        items:
+          $ref: '#/definitions/Disk'
+      id:
+        description: A unique identifier.
+        type: string
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      storage_hard_limit_pct:
+        type: integer
+        format: int32
+      storage_soft_limit_pct:
+        type: integer
+        format: int32
+      vms:
+        type: array
+        items:
+          $ref: '#/definitions/Vm'
+      quota_cluster_limits:
+        type: array
+        items:
+          $ref: '#/definitions/QuotaClusterLimit'
+
+  QuotaClusterLimit:
+    type: object
+    properties:
+      comment:
+        description: Free text containing comments about this object.
+        type: string
+      description:
+        description: A human-readable description in plain text.
+        type: string
+      id:
+        description: A unique identifier.
+        type: string
+      memory_limit:
+        type: number
+        format: double
+      memory_usage:
+        type: number
+        format: double
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      vcpu_limit:
+        type: integer
+        format: int32
+      vcpu_usage:
+        type: integer
+        format: int32
+      quota:
+        $ref: '#/definitions/Quota'
+      cluster:
+        $ref: '#/definitions/Cluster'
+
+  SchedulingPolicy:
+    description: |-
+      The configuration of the virtual machine's scheduling policy.
+    type: object
+    properties:
+      default_policy:
+        type: boolean
+      id:
+        description: A unique identifier.
+        type: string
+      locked:
+        type: boolean
+      properties:
+        type: array
+        items:
+          $ref: '#/definitions/Property'
+      balances:
+        type: array
+        items:
+          $ref: '#/definitions/Balance'
+      filter:
+        type: array
+        items:
+          $ref: '#/definitions/Filter'
+      weight:
+        type: array
+        items:
+          $ref: '#/definitions/Weight'
+
+  SchedulingPolicyUnit:
+    type: object
+    properties:
+      comment:
+        description: Free text containing comments about this object.
+        type: string
+      description:
+        type: string
+      enabled:
+        type: boolean
+      id:
+        description: A unique identifier.
+        type: string
+      internal:
+        type: boolean
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      properties:
+        $ref: '#/definitions/Property'
+      type:
+        $ref: '#/definitions/PolicyUnitType'
+      scheduling_policy:
+        $ref: '#/definitions/SchedulingPolicy'
+      scheduling_policy_unit:
+        $ref: '#/definitions/SchedulingPolicyUnit'
+
+  Snapshot:
+    description: |-
+      Represents a snapshot object.
+
+      Example XML representation:
+
+      [source,xml]
+      ----
+      ```
+      <snapshot id="456" href="/ovirt-engine/api/vms/123/snapshots/456">
+        <actions>
+          <link rel="restore" href="/ovirt-engine/api/vms/123/snapshots/456/restore"/>
+        </actions>
+        <vm id="123" href="/ovirt-engine/api/vms/123"/>
+        <description>Virtual Machine 1 - Snapshot A</description>
+        <type>active</type>
+        <date>2010-08-16T14:24:29</date>
+        <persist_memorystate>false</persist_memorystate>
+      </snapshot>
+      ```
+      ----
+    type: object
+    properties:
+      date:
+        description: The date when this snapshot has been created.
+        type: string
+        format: epoch
+      description:
+        description: A human-readable description in plain text.
+        type: string
+      id:
+        description: A unique identifier.
+        type: string
+      snapshot_status:
+        description: Status of the snapshot.
+        type: string
+        enum:
+          - in_preview
+          - locked
+          - ok
+      snapshot_type:
+        description: Type of the snapshot.
+        type: string
+        enum:
+          - active
+          - preview
+          - regular
+          - stateless
+      disk_attachments:
+        description: References the disks attached to the virtual machine.
+        type: array
+        items:
+          $ref: '#/definitions/DiskAttachment'
+      vm:
+        description: The virtual machine this snapshot has been taken for.
+        $ref: '#/definitions/Vm'
+
+  Statistic:
+    description: |-
+      A generic type used for all kinds of statistics.
+
+      Statistic contains the statistics values for various entities.
+      The following object contain statistics:
+
+      * Disk
+      * Host
+      * HostNic
+      * NumaNode
+      * Nic
+      * Vm
+      * GlusterBrick
+      * Step
+      * GlusterVolume
+    type: object
+    properties:
+      id:
+        description: A unique identifier.
+        type: string
+      kind:
+        description: The type of statistic measures.
+        type: string
+        enum:
+          - counter
+          - gauge
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      type:
+        description: The data type for the statistical values that follow.
+        type: string
+        enum:
+          - decimal
+          - integer
+          - string
+      unit:
+        description: The unit or rate to measure of the statistical values.
+        type: string
+        enum:
+          - bits_per_second
+          - bytes
+          - bytes_per_second
+          - count_per_second
+          - none
+          - percent
+          - seconds
+      values:
+        description: A data set that contains `datum`.
+        type: array
+        items:
+          $ref: '#/definitions/Value'
+      nic:
+        $ref: '#/definitions/Nic'
+      vm:
+        $ref: '#/definitions/Vm'
+
+  StorageDomain:
+    description: |-
+      Storage domain.
+
+      An XML representation of a NFS storage domain with identifier `123`:
+
+      [source,xml]
+      ----
+      ```
+      <storage_domain href="/ovirt-engine/api/storagedomains/123" id="123">
+        <name>mydata</name>
+        <description>My data</description>
+        <available>38654705664</available>
+        <committed>1073741824</committed>
+        <critical_space_action_blocker>5</critical_space_action_blocker>
+        <external_status>ok</external_status>
+        <master>true</master>
+        <storage>
+          <address>mynfs.example.com</address>
+          <nfs_version>v3</nfs_version>
+          <path>/exports/mydata</path>
+          <type>nfs</type>
+        </storage>
+        <storage_format>v3</storage_format>
+        <type>data</type>
+        <used>13958643712</used>
+        <warning_low_space_indicator>10</warning_low_space_indicator>
+        <wipe_after_delete>false</wipe_after_delete>
+        <data_centers>
+          <data_center href="/ovirt-engine/api/datacenters/456" id="456"/>
+        </data_centers>
+      </storage_domain>
+      ```
+      ----
+    type: object
+    properties:
+      available:
+        type: integer
+        format: int32
+      comment:
+        description: Free text containing comments about this object.
+        type: string
+      committed:
+        type: integer
+        format: int32
+      critical_space_action_blocker:
+        type: integer
+        format: int32
+      description:
+        description: A human-readable description in plain text.
+        type: string
+      discard_after_delete:
+        description: |-
+          Indicates whether <<types/disk, disk>>s' blocks on block <<types/storage_domain, storage domain>>s will be
+          discarded right before they are deleted.
+
+          If true, and a disk on this storage domain has its `wipe_after_delete` value enabled, then when the disk is
+          deleted:
+
+          . It is first wiped.
+          . Then its blocks are discarded.
+          . Finally it is deleted.
+
+          Note that:
+
+          * Discard after delete will always be `false` for non block storage types.
+
+          * Discard after delete can be set to `true` only if the storage domain
+          <<types/storage_domain/attributes/supports_discard, supports discard>>.
+        type: boolean
+      external_status:
+        type: string
+        enum:
+          - error
+          - failure
+          - info
+          - ok
+          - warning
+      id:
+        description: A unique identifier.
+        type: string
+      import:
+        type: boolean
+      master:
+        type: boolean
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      status:
+        type: string
+        enum:
+          - activating
+          - active
+          - detaching
+          - inactive
+          - locked
+          - maintenance
+          - mixed
+          - preparing_for_maintenance
+          - unattached
+          - unknown
+      storage_format:
+        type: string
+        enum:
+          - v1
+          - v2
+          - v3
+          - v4
+      supports_discard:
+        description: |-
+          Indicates whether a block storage domain supports discard operations.
+          A <<types/storage_domain,storage domain>> only supports discard
+          if all of the <<types/logical_unit, logical unit>>s that it is built
+          from support discard; that is, if each logical unit's `discard_max_size` value
+          is greater than 0.
+          This is one of the conditions necessary for a virtual disk in this
+          storage domain to have its `pass_discard` attribute enabled.
+          Since the engine cannot check if the underlying block device supports
+          discard for file storage domains, this attribute will not be reported
+          for them at all.
+        type: boolean
+      supports_discard_zeroes_data:
+        description: |-
+          Indicates whether a block storage domain supports the property that
+          discard zeroes the data.
+          A <<types/storage_domain,storage domain>> only supports the property that
+          discard zeroes the data if all of the
+          <<types/logical_unit, logical unit>>s that it is built from support it;
+          that is, if each logical unit's `discard_zeroes_data` value is true.
+          This is one of the conditions necessary for a virtual disk in this
+          storage domain to have both `wipe_after_delete` and `pass_discard` attributes enabled.
+          Since the engine cannot check if the underlying block device supports
+          the property that discard zeroes the data for file storage domains,
+          this attribute will not be reported for them at all.
+        type: boolean
+      type:
+        type: string
+        enum:
+          - data
+          - export
+          - image
+          - iso
+          - volume
+      used:
+        type: integer
+        format: int32
+      warning_low_space_indicator:
+        type: integer
+        format: int32
+      wipe_after_delete:
+        description: |-
+          Serves as the default value of `wipe_after_delete` for <<types/disk, disk>>s on this
+          <<types/storage_domain, storage domain>>.
+
+          That is, newly created disks will get their `wipe_after_delete` value from their storage domains by default.
+          Note that the configuration value `SANWipeAfterDelete` serves as the default value of block storage domains'
+          `wipe_after_delete` value.
+        type: boolean
+      host:
+        description: Host is only relevant at creation time.
+        $ref: '#/definitions/Host'
+      data_center:
+        description: |-
+          A link to the data center that the storage domain is attached to. This is preserved for backwards
+          compatibility only, as the storage domain may be attached to multiple data centers (if it is an ISO domain). Use
+          the `dataCenters` element instead.
+        $ref: '#/definitions/DataCenter'
+      data_centers:
+        description: A set of links to the data centers that the storage domain is attached to.
+        type: array
+        items:
+          $ref: '#/definitions/DataCenter'
+
+  Tag:
+    description: Represents a tag in the system.
+    type: object
+    properties:
+      comment:
+        description: Free text containing comments about this object.
+        type: string
+      description:
+        description: A human-readable description in plain text.
+        type: string
+      id:
+        description: A unique identifier.
+        type: string
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      host:
+        $ref: '#/definitions/Host'
+      vm:
+        $ref: '#/definitions/Vm'
+      parent:
+        description: Reference to the parent tag of this tag.
+        $ref: '#/definitions/Tag'
+  
+  Template:
+    description: Type representing a virtual machine template.
+    type: object
+    properties:
+      id:
+        description: A unique identifier.
+        type: string
+      name:
+        description: A human-readable name in plain text.
+        type: string
+  
+  Value:
+    type: object
+    properties:
+      datum:
+        type: integer
+
+  Vm:
+    description: Represents a virtual machine.
+    type: object
+    properties:
+      cpu:
+        description: |-
+          The configuration of the virtual machine CPU.
+
+          The socket configuration can be updated without rebooting the virtual machine. The cores and the threads require
+          a reboot.
+
+          For example, to change the number of sockets to 4 immediately, and the number of cores and threads to 2 after
+          reboot, send the following request:
+
+          [source]
+          ----
+          PUT /ovirt-engine/api/vms/123
+          ----
+
+          With a request body:
+
+          [source,xml]
+          ----
+          <vm>
+            <cpu>
+              <topology>
+                <sockets>4</sockets>
+                <cores>2</cores>
+                <threads>2</threads>
+              </topology>
+            </cpu>
+          </vm>
+          ----
+        $ref: '#/definitions/Cpu'
+      high_availability:
+        description: |-
+          The virtual machine high availability configuration.
+          If set, the virtual machine will be automatically restarted when it unexpectedly goes down.
+        $ref: '#/definitions/HighAvailability'
+      id:
+        description: A unique identifier.
+        type: string
+      memory:
+        description: |-
+          The virtual machine's memory, in bytes.
+
+          For example, to update a virtual machine to contain 1 Gibibyte (GiB) of memory, send the following request:
+
+          [source]
+          ----
+          PUT /ovirt-engine/api/vms/123
+          ----
+
+          With the following request body:
+
+          [source,xml]
+          ----
+          <vm>
+            <memory>1073741824</memory>
+          </vm>
+          ----
+
+          NOTE: Memory in the example is converted to bytes using the following formula: +
+          1 GiB = 2^30^ bytes = 1073741824 bytes.
+
+          NOTE: Memory hot plug is supported from {product-name} 3.6 onwards. You can use the example above to increase
+          memory while the virtual machine is running.
+        type: integer
+        format: int32
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      placement_policy:
+        description: |-
+          The configuration of the virtual machine's placement policy.
+
+          This configuration can be updated to pin a virtual machine to one or more hosts.
+
+          NOTE: Virtual machines that are pinned to multiple hosts cannot be live migrated, but in the event of a host
+          failure, any virtual machine configured to be highly available is automatically restarted on one of the other
+          hosts to which the virtual machine is pinned.
+
+          For example, to pin a virtual machine to two hosts, send the following request:
+
+          [source]
+          ----
+          PUT /api/vms/123
+          ----
+
+          With a request body like this:
+
+          [source,xml]
+          <vm>
+            <high_availability>
+              <enabled>true</enabled>
+              <priority>1</priority>
+            </high_availability>
+            <placement_policy>
+              <hosts>
+                <host>
+                  <name>Host1</name>
+                </host>
+                <host>
+                  <name>Host2</name>
+                </host>
+              </hosts>
+              <affinity>pinned</affinity>
+            </placement_policy>
+          </vm>
+          ----
+        $ref: '#/definitions/VmPlacementPolicy'
+      status:
+        description: The current status of the virtual machine.
+        type: string
+        enum:
+          - down
+          - image_locked
+          - migrating
+          - not_responding
+          - paused
+          - powering_down
+          - powering_up
+          - reboot_in_progress
+          - restoring_state
+          - saving_state
+          - suspended
+          - unassigned
+          - unknown
+          - up
+          - wait_for_launch
+
+  VmPlacementPolicy:
+    type: object
+    properties:
+      affinity:
+        type: string
+        enum:
+          - migratable
+          - pinned
+          - user_migratable
+      hosts:
+        type: array
+        items:
+          $ref: '#/definitions/Host'
+
+  VnicPassThrough:
+    type: object
+    properties:
+      mode:
+        description: 'Defines whether the vNIC will be implemented as a virtual device, or as a pass-through to a host device.'
+        type: string
+        enum:
+          - disabled
+          - enabled
+
+  VnicProfile:
+    description: 'A vNIC profile is a collection of settings that can be applied to individual <<types/nic,NIC>>.'
+    type: object
+    properties:
+      comment:
+        description: Free text containing comments about this object.
+        type: string
+      description:
+        description: A human-readable description in plain text.
+        type: string
+      id:
+        description: A unique identifier.
+        type: string
+      migratable:
+        description: |-
+          Marks, whether `pass_through` NIC is migratable or not.
+
+          If `pass_through.mode` is set to `disabled` this option has no meaning, and it will be considered to be `true`.
+          If you omit this option from request, by default, this will be set to `true`.
+
+          When migrating virtual machine, this virtual machine will be migrated only if all `pass_through` NICs are
+          flagged as `migratable`.
+        type: boolean
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      pass_through:
+        description: |-
+          Enables the passthrough to a SR-IOV-enabled <<types/host_nic,host NIC>>.
+
+          A vNIC profile enables a NIC to be directly connected to a
+          <<types/host_nic_virtual_functions_configuration,virtual function (VF)>> of an SR-IOV-enabled
+          host NIC, if passthrough is enabled. The NIC will then bypass the software network virtualization and
+          connect directly to the VF for direct device assignment.
+
+          The passthrough cannot be enabled if the vNIC profile is already attached to a NIC.
+          If a vNIC profile has passthrough enabled, `qos` and `port_mirroring` are disabled for the vNIC profile.
+        $ref: '#/definitions/VnicPassThrough'
+      port_mirroring:
+        description: |-
+          Enables port mirroring.
+
+          Port mirroring copies layer 3 network traffic on a given <<types/network,logical network>>and
+          <<types/host,host>> to a NIC on a <<types/vm,virtual machine>>. This virtual machine
+          can be used for network debugging and tuning, intrusion detection, and monitoring the behavior of other
+          virtual machine on the same host and logical network. The only
+          traffic copied is internal to one logical network on one host. There is no
+          increase on traffic on the network external to the host; however a virtual machine
+          with port mirroring enabled uses more host CPU and RAM than other virtual machines.
+
+          Port mirroring has the following limitations:
+
+           - Hot plugging NIC with a vNIC profile that has port mirroring enabled is not supported.
+           - Port mirroring cannot be altered when the vNIC profile is attached to a virtual machine.
+
+          Given the above limitations, it is recommended that you enable port mirroring on an additional,
+          dedicated vNIC profile.
+
+          IMPORTANT: Enabling port mirroring reduces the privacy of other network users.
+        type: boolean
+      network:
+        description: Reference to the network that the vNIC profile is applied to.
+        $ref: '#/definitions/Network'
+      qos:
+        description: |-
+          Reference to the quality of service attributes to apply to the vNIC profile.
+
+          Quality of Service attributes regulate inbound and outbound network traffic of the
+          NIC.
+        $ref: '#/definitions/Qos'
+
+  Weight:
+    description: |-
+      A configuration set that used in scheduling policy, to determine the cost for runs a new vm on hosts.
+    type: object
+    properties:
+      comment:
+        description: Free text containing comments about this object.
+        type: string
+      description:
+        type: string
+      factor:
+        type: string
+      id:
+        description: A unique identifier.
+        type: string
+      name:
+        description: A human-readable name in plain text.
+        type: string
+      scheduling_policy:
+        $ref: '#/definitions/SchedulingPolicy'
+      scheduling_policy_unit:
+        $ref: '#/definitions/SchedulingPolicyUnit'

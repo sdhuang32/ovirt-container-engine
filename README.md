@@ -7,8 +7,8 @@ Dockerized version of ovirt-engine, the management part of oVirt.
 ## Run ovirt-engine
 
 ```bash
-docker run --name ovirt-postgres -e POSTGRES_PASSWORD=engine -e POSTGRES_USER=engine -e POSTGRES_DB=engine -d rmohr/ovirt-postgres
-docker run --name ovirt-engine  --link ovirt-postgres:postgres -e OVIRT_PASSWORD=engine -p 8443:8443 -d rmohr/ovirt-engine
+docker run --name ovirt-postgres -e POSTGRES_PASSWORD=engine -e POSTGRES_USER=engine -e POSTGRES_DB=engine --rm -d wooshot/ovirt-psql
+docker run --name ovirt-engine  --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro --link ovirt-postgres:postgres -e OVIRT_PASSWORD=engine --rm -p 8443:8443 -d wooshot/oe4.2
 
 ```
 Visit https://127.0.0.1:8443 and login with the user `admin` and the password

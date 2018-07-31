@@ -10,7 +10,7 @@ trap "rm -f ${PID_FILE}; exit 0" INT TERM EXIT
 
 while true; do
     LOCAL_IP=$(cat /etc/repmgr.conf | grep conninfo | awk '{print $1}' | awk -F '=' '{print $3}')
-    if su - postgres -c pg_isready; then
+    if su - postgres -c "pg_isready -h postgres"; then
         MASTER_IP=$(su - postgres -c "repmgr cluster show" 2>/dev/null | grep master | awk '{print $7}' | awk -F '=' '{print $2}')
         if [ "x${MASTER_IP}" != "x" ]; then
             if [ "x${LOCAL_IP}" = "x${MASTER_IP}" ]; then

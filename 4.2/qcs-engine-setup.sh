@@ -2,6 +2,8 @@
 
 set -e
 
+echo "*** start QCS container engine setup ***"
+
 cp -f /answers.conf.in /answers.conf
 echo OVESETUP_DB/user=str:$POSTGRES_USER >> /answers.conf
 echo OVESETUP_DB/password=str:$POSTGRES_PASSWORD >> /answers.conf
@@ -19,8 +21,7 @@ echo OVESETUP_CONFIG/adminUserId=str:$OVIRT_ADMIN_UID >> /answers.conf
 cp -a --no-preserve=ownership /etc/pki/ovirt-engine.tmpl/* /etc/pki/ovirt-engine/
 
 # Wait for postgres
-#dockerize -wait tcp://${POSTGRES_HOST}:${POSTGRES_PORT} -timeout 1m
-#dockerize -wait tcp://ovirt-dwh:5432 -timeout 1m
+dockerize -wait tcp://${POSTGRES_HOST}:${POSTGRES_PORT} -timeout 1m
 
 # engine-setup required
 export PGPASSWORD=$POSTGRES_PASSWORD
@@ -71,23 +72,13 @@ engine-config -s SSLEnabled=$HOST_ENCRYPT
 engine-config -s EncryptHostCommunication=$HOST_ENCRYPT
 engine-config -s BlockMigrationOnSwapUsagePercentage=$BLOCK_MIGRATION_ON_SWAP_USAGE_PERCENTAGE
 
-# repmgr setup
-su - postgres -c "createuser -s repmgr"
-su - postgres -c "createdb repmgr -O repmgr"
+# if the master node fails, we need to re-add that node
+# into cluster as a standby node, so we disable running
+# the postgresql and ovirt related services at boot time to
+# prevent split-brain condition.
+systemctl disable rh-postgresql95-postgresql
+systemctl disable ovirt-engine-dwhd
+systemctl disable ovirt-engine
+systemctl disable rh-postgresql95-repmgr
 
-DATA_DIR="/var/opt/rh/rh-postgresql95/lib/pgsql/data"
-cp /root/repmgr.conf.in /etc/repmgr.conf
-cp /root/postgresql.replication.conf ${DATA_DIR}/
-cp /root/pg_hba.conf.append ${DATA_DIR}/
-echo "include 'postgresql.replication.conf'" >> ${DATA_DIR}/postgresql.conf
-cat ${DATA_DIR}/pg_hba.conf.append >> ${DATA_DIR}/pg_hba.conf
-chmod 600 ${DATA_DIR}/postgresql.replication.conf
-chown postgres:postgres ${DATA_DIR}/postgresql.replication.conf
-
-systemctl restart rh-postgresql95-postgresql
-# make sure postgresql is ready to accept connections
-until su - postgres -c pg_isready
-do
-  echo "Waiting for postgres..."
-  sleep 2;
-done
+echo "*** finished QCS container engine setup ***"

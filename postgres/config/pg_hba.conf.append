@@ -1,0 +1,10 @@
+host engine engine 0.0.0.0/0 md5
+host engine engine ::0/0 md5
+host ovirt_engine_history ovirt_engine_history 0.0.0.0/0 md5
+host ovirt_engine_history ovirt_engine_history ::0/0 md5
+
+local replication repmgr trust
+host replication repmgr all trust
+
+local repmgr repmgr trust
+host repmgr repmgr all trust
